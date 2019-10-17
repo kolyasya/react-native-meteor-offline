@@ -3,6 +3,8 @@ import { AsyncStorage } from 'react-native';
 import _ from 'lodash';
 import { persistStore, autoRehydrate, createTransform } from 'redux-persist';
 
+purge = null;
+
 export default class MeteorOffline {
   constructor(options = {}) {
     this.offline = true;
@@ -22,7 +24,10 @@ export default class MeteorOffline {
         this.store.loaded();
       }
     );
-    console.log('initializing');
+
+    // Temp function for development
+    purge = () => this.persistor.purge();
+
     Meteor.waitDdpConnected(() => {
       if (Meteor.ddp.status === 'connected') {
         this.offline = false;

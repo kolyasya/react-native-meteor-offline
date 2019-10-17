@@ -6,11 +6,11 @@ const meteorReduxReducers = (
   action
 ) => {
   const { type, collection, id, fields, cleared } = action;
-  // console.log(type);
   switch (type) {
     case 'SET_USERID': {
       return { ...state, userId: id };
     }
+
     case 'RECENTLY_ADDED': {
       return {
         ...state,
@@ -20,14 +20,24 @@ const meteorReduxReducers = (
         ],
       };
     }
+
     case 'ADDED': {
-      // doc and/or collection don't exist yet, add them
-      if (_.isEqual(_.get(state, `${collection}.${id}`, {}), fields)) return state;
+      // If doc and/or collection don't exist yet, add them
+      const existingDocument = _.get(state, `${collection}.${id}`, {});
+
+      if (_.isEqual(existingDocument, fields)) {
+        return state;
+      }
+
       return {
         ...state,
-        [collection]: { ...state[collection], [id]: fields },
+        [collection]: { 
+          ...state[collection], 
+          [id]: fields 
+        },
       };
     }
+
     case 'CHANGED': {
       // something's changed, add/update
       if (cleared.length) {
@@ -36,6 +46,7 @@ const meteorReduxReducers = (
       } else if (_.isEqual(_.get(state, `${collection}.${id}`), fields)) return state;
       return { ...state, [collection]: { ...state[collection], [id]: fields } };
     }
+
     case 'REMOVED':
       if (state[collection] && state[collection][id]) {
         const newState = _.clone(state);
@@ -44,12 +55,14 @@ const meteorReduxReducers = (
       }
       // console.error(`Couldn't remove ${id}, not found in ${collection} collection`);
       return state;
+
     case 'SET_READY':
       // todo: check for removed docs
       return {
         ...state,
         ready: action.ready,
       };
+
     case 'REMOVE_AFTER_RECONNECT':
       // todo: check for removed docs
       const { removed } = action;
@@ -70,6 +83,7 @@ const meteorReduxReducers = (
         return action.payload;
       }
       return state;
+      
     case 'HARDRESET':
       console.log('hard reset');
       return {};
