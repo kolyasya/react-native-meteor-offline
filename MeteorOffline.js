@@ -1,9 +1,9 @@
 import Meteor from 'react-native-meteor';
 import { AsyncStorage } from 'react-native';
 import _ from 'lodash';
-import { persistStore, autoRehydrate, createTransform } from 'redux-persist';
 
 purge = null;
+getAsyncStorageItem = item => AsyncStorage.getItem(item).then(r => console.log(r));
 
 export default class MeteorOffline {
   constructor(options = {}) {
@@ -12,18 +12,9 @@ export default class MeteorOffline {
     this.firstConnection = true;
     this.subscriptions = [];
     this.collections = [];
-    this.store = options.store || initMeteorRedux(options.debugger || undefined, undefined, autoRehydrate());
-    this.persistor = persistStore(
-      this.store,
-      {
-        storage: AsyncStorage,
-        debounce: options.debounce || 1000,
-        blacklist: ['reactNativeMeteorOfflineRecentlyAdded'],
-      },
-      () => {
-        this.store.loaded();
-      }
-    );
+    this.store = options.store;
+
+    this.persistor = options.persistor;
 
     // Temp function for development
     purge = () => this.persistor.purge();
@@ -98,19 +89,13 @@ export default class MeteorOffline {
       _.get(this.subscriptions, `${subscriptionName}.ready`)
     ) {
       this.firstConnection = false;
-      const t = new Date();
-      const recentlyAddedIds = this.store.getState()
-        .reactNativeMeteorOfflineRecentlyAdded;
+
+      const recentlyAddedIds = this.store.getState()['METEOR_REDUX_REDUCERS'].reactNativeMeteorOfflineRecentlyAdded;
+
       const cachedIds = _.sortBy(_.keys(this.store.getState()[collection]));
-      // console.log(`got cached in ${new Date() - t}ms`);
+
       const removed = _.sortBy(_.difference(cachedIds, recentlyAddedIds)) || [];
-      // console.log(
-      //   `got difference in ${new Date() - t}ms`,
-      //   recentlyAddedIds,
-      //   cachedIds,
-      //   removed,
-      //   this.store.getState().reactNativeMeteorOfflineRecentlyAdded
-      // );
+
       this.store.dispatch({
         type: 'REMOVE_AFTER_RECONNECT',
         collection,

@@ -1,11 +1,20 @@
 import Meteor, { getData } from 'react-native-meteor';
 import _ from 'lodash';
 
+const initialState = { 
+  reactNativeMeteorOfflineRecentlyAdded: [] 
+};
+
 const meteorReduxReducers = (
-  state = { reactNativeMeteorOfflineRecentlyAdded: [] },
+  state = initialState,
   action
 ) => {
+
+  // console.log('STATE', state);
+  // console.log('action', action);
+
   const { type, collection, id, fields, cleared } = action;
+
   switch (type) {
     case 'SET_USERID': {
       return { ...state, userId: id };
@@ -70,17 +79,24 @@ const meteorReduxReducers = (
         state.reactNativeMeteorOfflineRecentlyAdded,
         ...removed
       );
+
       if (getData().db[collection]) getData().db[collection].remove({ _id: { $in: removed } });
+      
       return {
         ...state,
         reactNativeMeteorOfflineRecentlyAdded: withoutRemoved,
       };
+
     case 'persist/REHYDRATE':
+      console.log('PERSIST', action.payload);
+
       if (
-        typeof Meteor.ddp === 'undefined' ||
-        Meteor.ddp.status === 'disconnected'
+        (typeof Meteor.ddp === 'undefined' ||
+        Meteor.ddp.status === 'disconnected') &&
+        action.payload &&
+        action.payload.METEOR_REDUX_REDUCERS
       ) {
-        return action.payload;
+        return { ...action.payload.METEOR_REDUX_REDUCERS };
       }
       return state;
       

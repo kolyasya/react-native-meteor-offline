@@ -1,5 +1,7 @@
 import Meteor, { getData } from 'react-native-meteor';
 import { createStore, combineReducers } from 'redux';
+import { persistStore, persistReducer } from 'redux-persist';
+import { AsyncStorage } from 'react-native';
 
 import _ from 'lodash';
 import EventEmitter from 'events';
@@ -11,26 +13,39 @@ import returnCached from './returnCached';
 
 const meteorReduxEmitter = new EventEmitter();
 
-const METEOR_REDUX_REDUCERS = 'METEOR_REDUX_REDUCERS';
+const initMeteorRedux = ({
+  customReducers,
+  preloadedState,
+  enhancer,
+}) => {
 
-const initMeteorRedux = (
-  customDebugger = undefined,
-  preloadedState = undefined,
-  enhancer = undefined,
-  customReducers = undefined
-) => {
+  console.log('INIT METEOR REDUX', {customReducers,
+    preloadedState,
+    enhancer, meteorReduxReducers});
 
   // Combine passed app reducers with our package reducers
   const combinedReducers = customReducers !== undefined
-    ? combineReducers({ ...customReducers, [METEOR_REDUX_REDUCERS]: meteorReduxReducers })
+    ? combineReducers({ ...customReducers, METEOR_REDUX_REDUCERS: meteorReduxReducers })
     : meteorReduxReducers;
 
+  const persistedReducer = persistReducer({
+    key: 'root',
+    storage: AsyncStorage,
+    debounce: 1000,
+    // whitelist: ['METEOR_REDUX_REDUCERS'],
+  }, combinedReducers);
+
+  console.log({ persistedReducer, enhancer })
+
   const store = createStore(
-    combinedReducers,
-    customDebugger,
+    persistedReducer,
     preloadedState,
     enhancer
   );
+
+  persistor = persistStore(store);
+
+  console.log(store, persistor);
 
   store.loaded = () => {
     console.log('Redux store is loaded');
@@ -40,27 +55,42 @@ const initMeteorRedux = (
   meteorReduxEmitter.once('rehydrated', () => {
     // restore collections to minimongo
 
-    // _.each(store.getState()[METEOR_REDUX_REDUCERS], (collection, key) => {
-    //   const correctedCollection = _.chain(collection)
-    //     .map((doc) => doc)
+    console.log('')
+    console.log('Starting restoring collections from Async Storage to Mini Mongo', store.getState())
+
+    // Object.keys(store.getState().METEOR_REDUX_REDUCERS).map(collectionName => {
+
+    //   console.log('collectionName', collectionName);
+
+    //   const groundedCollection = store.getState().METEOR_REDUX_REDUCERS[collectionName];
+
+    //   console.log('groundedCollection', groundedCollection);
+
+
+    //   const correctedCollection = _.chain(groundedCollection)
+    //     .map(doc => doc)
     //     .filter('_id')
     //     .value();
 
     //   console.log({ correctedCollection });
 
     //   // add the collection if it doesn't exist
-    //   if (!getData().db[key]) {
+    //   if (!getData().db[collectionName]) {
+    //     console.log(`Collection ${collectionName} doesn't exist, adding to Mini Mongo...`)
     //     // add collection to minimongo
-    //     getData().db.addCollection(key);
+    //     getData().db.addCollection(collectionName);
     //   }
 
     //   // only upsert if the data doesn't match
-    //   if (!_.isEqual(getData().db[key], collection)) {
+    //   if (!_.isEqual(getData().db[collectionName], groundedCollection)) {
+    //     console.log(`Collection ${collectionName} are different, upserting...`)
     //     // add documents to collection
-    //     getData().db[key].upsert(correctedCollection);
+    //     getData().db[collectionName].upsert(correctedCollection);
     //   }
-
     // });
+
+    console.log('');
+    console.log('');
 
     store.dispatch({ type: 'SET_READY', ready: true });
   });
@@ -99,7 +129,7 @@ const initMeteorRedux = (
     }
   });
 
-  return store;
+  return { store, persistor };
 };
 
 export { meteorReduxReducers, subscribeCached, returnCached, MeteorOffline };
