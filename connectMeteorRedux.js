@@ -10,6 +10,7 @@ import meteorReduxReducers from './meteorReduxReducers';
 import MeteorOffline from './MeteorOffline';
 import subscribeCached from './subscribeCached';
 import returnCached from './returnCached';
+import restoreCollections from './restoreCollections';
 
 const meteorReduxEmitter = new EventEmitter();
 
@@ -19,14 +20,10 @@ const initMeteorRedux = ({
   enhancer,
 }) => {
 
-  console.log('INIT METEOR REDUX', {customReducers,
-    preloadedState,
-    enhancer, meteorReduxReducers});
-
-  // Combine passed app reducers with our package reducers
+  // Combine passed app reducers with our RNMO reducers
   const combinedReducers = customReducers !== undefined
     ? combineReducers({ ...customReducers, METEOR_REDUX_REDUCERS: meteorReduxReducers })
-    : meteorReduxReducers;
+    : combineReducers({ METEOR_REDUX_REDUCERS: meteorReduxReducers });
 
   const persistedReducer = persistReducer({
     key: 'root',
@@ -40,12 +37,12 @@ const initMeteorRedux = ({
   const store = createStore(
     persistedReducer,
     preloadedState,
-    enhancer
+    // enhancer
   );
 
   persistor = persistStore(store);
 
-  console.log(store, persistor);
+  console.log({ store });
 
   store.loaded = () => {
     console.log('Redux store is loaded');
@@ -58,36 +55,7 @@ const initMeteorRedux = ({
     console.log('')
     console.log('Starting restoring collections from Async Storage to Mini Mongo', store.getState())
 
-    // Object.keys(store.getState().METEOR_REDUX_REDUCERS).map(collectionName => {
-
-    //   console.log('collectionName', collectionName);
-
-    //   const groundedCollection = store.getState().METEOR_REDUX_REDUCERS[collectionName];
-
-    //   console.log('groundedCollection', groundedCollection);
-
-
-    //   const correctedCollection = _.chain(groundedCollection)
-    //     .map(doc => doc)
-    //     .filter('_id')
-    //     .value();
-
-    //   console.log({ correctedCollection });
-
-    //   // add the collection if it doesn't exist
-    //   if (!getData().db[collectionName]) {
-    //     console.log(`Collection ${collectionName} doesn't exist, adding to Mini Mongo...`)
-    //     // add collection to minimongo
-    //     getData().db.addCollection(collectionName);
-    //   }
-
-    //   // only upsert if the data doesn't match
-    //   if (!_.isEqual(getData().db[collectionName], groundedCollection)) {
-    //     console.log(`Collection ${collectionName} are different, upserting...`)
-    //     // add documents to collection
-    //     getData().db[collectionName].upsert(correctedCollection);
-    //   }
-    // });
+    restoreCollections({ store,  });
 
     console.log('');
     console.log('');

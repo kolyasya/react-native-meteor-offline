@@ -1,5 +1,5 @@
 {
-  "name": "react-native-meteor-offline",
+  "name": "react-native-meteor-redux",
   "version": "2.2.7",
   "description": "Link react-native-meteor to redux",
   "main": "connectMeteorRedux.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kolyasya/react-native-meteor-offline.git"
+    "url": "git+https://github.com/DesignmanIO/react-native-meteor-redux.git"
   },
   "keywords": [
     "react",
@@ -24,6 +24,10 @@
   ],
   "author": "Designman",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DesignmanIO/react-native-meteor-redux/issues"
+  },
+  "homepage": "https://github.com/DesignmanIO/react-native-meteor-redux#readme",
   "dependencies": {
     "events": "^1.1.1",
     "lodash": "^4.17.4",

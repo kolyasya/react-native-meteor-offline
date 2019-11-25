@@ -2,29 +2,23 @@ import Meteor, { getData } from 'react-native-meteor';
 import _ from 'lodash';
 
 const initialState = { 
-  reactNativeMeteorOfflineRecentlyAdded: [] 
+  RNMO_RECENTLY_ADDED: [] 
 };
 
 const meteorReduxReducers = (
   state = initialState,
   action
 ) => {
-
-  // console.log('STATE', state);
-  // console.log('action', action);
-
   const { type, collection, id, fields, cleared } = action;
 
   switch (type) {
-    case 'SET_USERID': {
-      return { ...state, userId: id };
-    }
 
+    // Add new item to recently added array
     case 'RECENTLY_ADDED': {
       return {
         ...state,
-        reactNativeMeteorOfflineRecentlyAdded: [
-          ...(state.reactNativeMeteorOfflineRecentlyAdded || []),
+        RNMO_RECENTLY_ADDED: [
+          ...(state.RNMO_RECENTLY_ADDED || []),
           id,
         ],
       };
@@ -33,10 +27,6 @@ const meteorReduxReducers = (
     case 'ADDED': {
       // If doc and/or collection don't exist yet, add them
       const existingDocument = _.get(state, `${collection}.${id}`, {});
-
-      if (_.isEqual(existingDocument, fields)) {
-        return state;
-      }
 
       return {
         ...state,
@@ -51,9 +41,17 @@ const meteorReduxReducers = (
       // something's changed, add/update
       if (cleared.length) {
         const nextDoc = _.omit(state[collection][id], cleared);
-        return { ...state, [collection]: { ...state[collection], [id]: nextDoc } };
-      } else if (_.isEqual(_.get(state, `${collection}.${id}`), fields)) return state;
-      return { ...state, [collection]: { ...state[collection], [id]: fields } };
+        return { 
+          ...state, 
+          [collection]: { ...state[collection], [id]: nextDoc } 
+        };
+      } else if (_.isEqual(_.get(state, `${collection}.${id}`), fields)) {
+        return state;
+      }
+      return { 
+        ...state, 
+        [collection]: { ...state[collection], [id]: fields } 
+      };
     }
 
     case 'REMOVED':
@@ -76,7 +74,7 @@ const meteorReduxReducers = (
       // todo: check for removed docs
       const { removed } = action;
       const withoutRemoved = _.without(
-        state.reactNativeMeteorOfflineRecentlyAdded,
+        state.RNMO_RECENTLY_ADDED,
         ...removed
       );
 
@@ -84,12 +82,10 @@ const meteorReduxReducers = (
       
       return {
         ...state,
-        reactNativeMeteorOfflineRecentlyAdded: withoutRemoved,
+        RNMO_RECENTLY_ADDED: withoutRemoved,
       };
 
     case 'persist/REHYDRATE':
-      console.log('PERSIST', action.payload);
-
       if (
         (typeof Meteor.ddp === 'undefined' ||
         Meteor.ddp.status === 'disconnected') &&
@@ -101,7 +97,6 @@ const meteorReduxReducers = (
       return state;
       
     case 'HARDRESET':
-      console.log('hard reset');
       return {};
     default:
       return state;
