@@ -81,10 +81,14 @@ export default class MeteorOffline {
       callback();
     }
     this.subscriptions[uniqueName].ready = subHandle.ready();
+
     return subHandle;
   }
 
   collection(collection, subscriptionName) {
+
+    console.log('RETURN COLLECTION', collection, subscriptionName, Meteor.collection(collection).find({}), Meteor.collection(collection));
+
     if (
       Meteor.status().connected &&
       this.firstConnection &&
