@@ -1,3 +1,4 @@
+import Meteor from 'react-native-meteor';
 import { createStore, combineReducers } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist';
 import { AsyncStorage } from 'react-native';
@@ -10,6 +11,15 @@ import restoreCollections from './src/restoreCollections';
 import registerDDPEvents from './src/registerDDPEvents';
 
 globalPersistor = '';
+disconnect = () => {
+  Meteor.disconnect();
+}
+
+reconnect = () => {
+  Meteor.reconnect();
+}
+
+setTimeout(() => disconnect(), 1000);
 
 const initMeteorRedux = ({
   customReducers,
@@ -32,7 +42,9 @@ const initMeteorRedux = ({
   const store = createStore(
     persistedReducer,
     preloadedState,
-    // enhancer
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__(
+      // enchacer
+    )
   );
 
   persistor = persistStore(store);
@@ -42,7 +54,7 @@ const initMeteorRedux = ({
 
   // Figure out why do we have timeout here
   // Seems like there should be some kind of event listener
-  setTimeout(() => restoreCollections({ store,  }), 100);
+  setTimeout(() => restoreCollections({ store,  }), 300);
 
   registerDDPEvents({ store });
 

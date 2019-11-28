@@ -25,9 +25,7 @@ const meteorReduxReducers = (
     }
 
     case 'ADDED': {
-      // If doc and/or collection don't exist yet, add them
-      const existingDocument = _.get(state, `${collection}.${id}`, {});
-
+      console.log("ADDDED", fields);
       return {
         ...state,
         [collection]: { 

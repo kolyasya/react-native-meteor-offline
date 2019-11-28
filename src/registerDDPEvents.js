@@ -1,4 +1,4 @@
-import Meteor, { getData } from 'react-native-meteor';
+import Meteor from 'react-native-meteor';
 
 const registerDDPEvents = ({ store }) => {
   Meteor.waitDdpConnected(() => {

@@ -1,6 +1,5 @@
 import { getData } from 'react-native-meteor';
-
-// store.dispatch({ type: 'SET_READY', ready: true });
+import _ from 'lodash';
 
 const restoreCollections = ({ store }) => {
 
@@ -10,20 +9,18 @@ const restoreCollections = ({ store }) => {
 
   Object.keys(store.getState().METEOR_REDUX_REDUCERS).map(collectionName => {
 
-    console.log('collectionName', collectionName);
+    if (['ready', 'RNMO_RECENTLY_ADDED'].includes(collectionName)) return;
 
-    const groundedCollection = store.getState().METEOR_REDUX_REDUCERS[collectionName];
+    console.log('');
+    console.log('RESTORRING COLLECTION', collectionName);
 
-    console.log('groundedCollection', groundedCollection);
+    const persistDocuments = store.getState().METEOR_REDUX_REDUCERS[collectionName];
 
-    return;
+    console.log('groundedCollection', persistDocuments);
 
-    const correctedCollection = _.chain(groundedCollection)
-      .map(doc => doc)
-      .filter('_id')
-      .value();
+    const persistDocumentsFixed = Object.keys(persistDocuments).map(k => ({ ...persistDocuments[k], _id: k }));
 
-    console.log({ correctedCollection });
+    console.log({ persistDocumentsFixed });
 
     // add the collection if it doesn't exist
     if (!getData().db[collectionName]) {
@@ -32,13 +29,18 @@ const restoreCollections = ({ store }) => {
       getData().db.addCollection(collectionName);
     }
 
+    console.log('EXISTING DATA', getData().db[collectionName]);
+
     // only upsert if the data doesn't match
-    if (!_.isEqual(getData().db[collectionName], groundedCollection)) {
+    if (!_.isEqual(getData().db[collectionName], persistDocuments)) {
       console.log(`Collection ${collectionName} are different, upserting...`)
       // add documents to collection
-      getData().db[collectionName].upsert(correctedCollection);
+      getData().db[collectionName].upsert(persistDocumentsFixed);
     }
   });
+
+  // Set ready to true so the app can use our GroundedPublication
+  store.dispatch({ type: 'SET_READY', ready: true });
 }
 
 export default restoreCollections;

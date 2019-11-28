@@ -51,12 +51,14 @@ export default class MeteorOffline {
   subscribe(uniqueName, name, ...params) {
     const hasCallback = typeof params[params.length - 1] === 'function';
     const justParams = params.slice(0, params.length - 1);
+
     _.set(this.subscriptions, `${uniqueName}.${name}`, name);
     _.set(
       this.subscriptions,
       `${uniqueName}.${params}`,
       JSON.stringify(justParams)
     );
+
     let subHandle = Meteor.subscribe(name, ...params);
     if (this.offline) {
       subHandle = {
