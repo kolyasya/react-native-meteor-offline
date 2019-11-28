@@ -2,7 +2,7 @@
   "name": "react-native-meteor-offline",
   "version": "2.2.7",
   "description": "Link react-native-meteor to redux",
-  "main": "connectMeteorRedux.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -6,11 +6,11 @@ import { AsyncStorage } from 'react-native';
 import _ from 'lodash';
 import EventEmitter from 'events';
 
-import meteorReduxReducers from './meteorReduxReducers';
-import MeteorOffline from './MeteorOffline';
-import subscribeCached from './subscribeCached';
-import returnCached from './returnCached';
-import restoreCollections from './restoreCollections';
+import meteorReduxReducers from 'react-native-meteor-offline/src/meteorReduxReducers';
+import MeteorOffline from 'react-native-meteor-offline/src/MeteorOffline';
+import subscribeCached from 'react-native-meteor-offline/src/subscribeCached';
+import returnCached from 'react-native-meteor-offline/src/returnCached';
+import restoreCollections from 'react-native-meteor-offline/src/restoreCollections';
 
 const meteorReduxEmitter = new EventEmitter();
 
