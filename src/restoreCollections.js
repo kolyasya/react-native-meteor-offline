@@ -1,6 +1,13 @@
 import { getData } from 'react-native-meteor';
 
+// store.dispatch({ type: 'SET_READY', ready: true });
+
 const restoreCollections = ({ store }) => {
+
+  console.log('STARTING RESTORE')
+
+  console.log(store.getState().METEOR_REDUX_REDUCERS);
+
   Object.keys(store.getState().METEOR_REDUX_REDUCERS).map(collectionName => {
 
     console.log('collectionName', collectionName);
@@ -9,6 +16,7 @@ const restoreCollections = ({ store }) => {
 
     console.log('groundedCollection', groundedCollection);
 
+    return;
 
     const correctedCollection = _.chain(groundedCollection)
       .map(doc => doc)
@@ -32,3 +40,5 @@ const restoreCollections = ({ store }) => {
     }
   });
 }
+
+export default restoreCollections;

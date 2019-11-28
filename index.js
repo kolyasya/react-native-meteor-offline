@@ -1,18 +1,15 @@
-import Meteor, { getData } from 'react-native-meteor';
 import { createStore, combineReducers } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist';
 import { AsyncStorage } from 'react-native';
 
-import _ from 'lodash';
-import EventEmitter from 'events';
+import meteorReduxReducers from './src/meteorReduxReducers';
+import MeteorOffline from './src/MeteorOffline';
+import subscribeCached from './src/subscribeCached';
+import returnCached from './src/returnCached';
+import restoreCollections from './src/restoreCollections';
+import registerDDPEvents from './src/registerDDPEvents';
 
-import meteorReduxReducers from 'react-native-meteor-offline/src/meteorReduxReducers';
-import MeteorOffline from 'react-native-meteor-offline/src/MeteorOffline';
-import subscribeCached from 'react-native-meteor-offline/src/subscribeCached';
-import returnCached from 'react-native-meteor-offline/src/returnCached';
-import restoreCollections from 'react-native-meteor-offline/src/restoreCollections';
-
-const meteorReduxEmitter = new EventEmitter();
+globalPersistor = '';
 
 const initMeteorRedux = ({
   customReducers,
@@ -32,8 +29,6 @@ const initMeteorRedux = ({
     // whitelist: ['METEOR_REDUX_REDUCERS'],
   }, combinedReducers);
 
-  console.log({ persistedReducer, enhancer })
-
   const store = createStore(
     persistedReducer,
     preloadedState,
@@ -42,60 +37,14 @@ const initMeteorRedux = ({
 
   persistor = persistStore(store);
 
-  console.log({ store });
+  // Temporary
+  globalPersistor = persistor;
 
-  store.loaded = () => {
-    console.log('Redux store is loaded');
-    meteorReduxEmitter.emit('rehydrated');
-  };
+  // Figure out why do we have timeout here
+  // Seems like there should be some kind of event listener
+  setTimeout(() => restoreCollections({ store,  }), 100);
 
-  meteorReduxEmitter.once('rehydrated', () => {
-    // restore collections to minimongo
-
-    console.log('')
-    console.log('Starting restoring collections from Async Storage to Mini Mongo', store.getState())
-
-    restoreCollections({ store,  });
-
-    console.log('');
-    console.log('');
-
-    store.dispatch({ type: 'SET_READY', ready: true });
-  });
-
-  Meteor.waitDdpConnected(() => {
-    let connected = true;
-    
-    Meteor.ddp.on('disconnected', () => {
-      connected = false;
-    });
-
-    if (connected) {
-      Meteor.ddp.on('removed', ({ collection, id, fields = {} }) => {
-        store.dispatch({ type: 'REMOVED', collection, id, fields });
-      });
-
-      Meteor.ddp.on('changed', ({ collection, id, fields = {}, cleared = [] }) => {
-        store.dispatch({ type: 'CHANGED', collection, id, fields, cleared });
-      });
-
-      Meteor.ddp.on('added', ({ collection, id, fields = {} }, ...args) => {
-        store.dispatch({ type: 'ADDED', collection, id, fields });
-        store.dispatch({ type: 'RECENTLY_ADDED', id });
-
-        // const { collection, id } = obj;
-        // const addedObject = { ...obj.fields, _id: id } || {};
-
-        // const offlineCollection = store.getState()[METEOR_REDUX_REDUCERS][collection];
-        // const existingObject = offlineCollection && offlineCollection[id];
-
-        // if (!_.isEqual(addedObject, existingObject)) {
-        //   store.dispatch({ type: 'ADDED', collection, id, fields: addedObject });
-        // }
-
-      });
-    }
-  });
+  registerDDPEvents({ store });
 
   return { store, persistor };
 };
