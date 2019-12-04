@@ -2,7 +2,6 @@ import Meteor, { getData } from 'react-native-meteor';
 import _ from 'lodash';
 
 const initialState = { 
-  // RNMO_RECENTLY_ADDED: [],
   RNMO_USER: null,
 };
 
@@ -19,17 +18,6 @@ const meteorReduxReducers = (
       return {
         ...state,
         RNMO_USER: payload,
-      };
-    }
-
-    // Add new item to recently added array
-    case 'RECENTLY_ADDED': {
-      return {
-        ...state,
-        RNMO_RECENTLY_ADDED: [
-          ...(state.RNMO_RECENTLY_ADDED || []),
-          id,
-        ],
       };
     }
 
@@ -76,22 +64,7 @@ const meteorReduxReducers = (
         ...state,
         ready: action.ready,
       };
-
-    case 'REMOVE_AFTER_RECONNECT':
-      // todo: check for removed docs
-      const { removed } = action;
-      const withoutRemoved = _.without(
-        state.RNMO_RECENTLY_ADDED,
-        ...removed
-      );
-
-      if (getData().db[collection]) getData().db[collection].remove({ _id: { $in: removed } });
       
-      return {
-        ...state,
-        RNMO_RECENTLY_ADDED: withoutRemoved,
-      };
-
     case 'persist/REHYDRATE':
       if (
         (typeof Meteor.ddp === 'undefined' ||
@@ -105,6 +78,7 @@ const meteorReduxReducers = (
       
     case 'HARDRESET':
       return {};
+
     default:
       return state;
   }
