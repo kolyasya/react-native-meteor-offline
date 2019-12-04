@@ -42,9 +42,9 @@ const initMeteorRedux = ({
   const store = createStore(
     persistedReducer,
     preloadedState,
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__(
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__(
       // enchacer
-    )
+    ),
   );
 
   persistor = persistStore(store);

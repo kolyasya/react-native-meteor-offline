@@ -8,24 +8,14 @@ getAsyncStorageItem = item => AsyncStorage.getItem(item).then(r => console.log(r
 export default class MeteorOffline {
   constructor(options = {}) {
     this.offline = true;
-    // first time connecting since app open or connection restored
-    this.firstConnection = true;
+
     this.subscriptions = [];
     this.collections = [];
+
     this.store = options.store;
 
-    this.persistor = options.persistor;
-
-    // Temp function for development
-    purge = () => this.persistor.purge();
-
     Meteor.waitDdpConnected(() => {
-      if (Meteor.ddp.status === 'connected') {
-        this.offline = false;
-      } else {
-        this.offline = true;
-        this.firstConnection = false;
-      }
+      this.offline = (Meteor.ddp.status === 'connected') ? false : true;
     });
   }
 
@@ -34,18 +24,17 @@ export default class MeteorOffline {
   }
 
   user() {
-    if (Meteor.user()) {
-      this.store.dispatch({ type: 'SET_USERID', id: Meteor.userId() });
-      return Meteor.user();
-    }
-    const { userId } = this.store.getState();
-    return Meteor.collection('users').findOne(userId);
-  }
+    const user = Meteor.user();
 
-  reset() {
-    this.store.dispatch({ type: 'HARDRESET' });
-    this.persistor.purge();
-    //console.log('performed meteor offline hard reset');
+    // If we have user loaded
+    if (user) {
+      this.store.dispatch({ type: 'SET_USER', payload: user });
+      return user;
+    }
+    // Return user from cache
+    const { RNMO_USER } = this.store.getState();
+    console.log('Return cached user', RNMO_USER);
+    return RNMO_USER;
   }
 
   subscribe(uniqueName, name, ...params) {
@@ -86,28 +75,11 @@ export default class MeteorOffline {
   }
 
   collection(collection, subscriptionName) {
-
+    // React-native-meteor clears MiniMongo collections on reconnect
+    // https://github.com/inProgress-team/react-native-meteor/blob/master/src/Meteor.js#L97
+    // Need to figure out way to handle this situations
     console.log('RETURN COLLECTION', collection, subscriptionName, Meteor.collection(collection).find({}), Meteor.collection(collection));
 
-    if (
-      Meteor.status().connected &&
-      this.firstConnection &&
-      _.get(this.subscriptions, `${subscriptionName}.ready`)
-    ) {
-      this.firstConnection = false;
-
-      const recentlyAddedIds = this.store.getState()['METEOR_REDUX_REDUCERS'].reactNativeMeteorOfflineRecentlyAdded;
-
-      const cachedIds = _.sortBy(_.keys(this.store.getState()[collection]));
-
-      const removed = _.sortBy(_.difference(cachedIds, recentlyAddedIds)) || [];
-
-      this.store.dispatch({
-        type: 'REMOVE_AFTER_RECONNECT',
-        collection,
-        removed,
-      });
-    }
     this.collections = _.uniq([...this.collections, collection]);
     return Meteor.collection(collection);
   }

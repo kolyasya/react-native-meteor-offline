@@ -18,7 +18,9 @@ const restoreCollections = ({ store }) => {
 
     console.log('groundedCollection', persistDocuments);
 
-    const persistDocumentsFixed = Object.keys(persistDocuments).map(k => ({ ...persistDocuments[k], _id: k }));
+    const persistDocumentsFixed = persistDocuments ? 
+                                  Object.keys(persistDocuments).map(k => ({ ...persistDocuments[k], _id: k })) : 
+                                  [];
 
     console.log({ persistDocumentsFixed });
 

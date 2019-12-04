@@ -2,16 +2,25 @@ import Meteor, { getData } from 'react-native-meteor';
 import _ from 'lodash';
 
 const initialState = { 
-  RNMO_RECENTLY_ADDED: [] 
+  RNMO_RECENTLY_ADDED: [],
+  RNMO_USER: null,
 };
 
 const meteorReduxReducers = (
   state = initialState,
   action
 ) => {
-  const { type, collection, id, fields, cleared } = action;
+  const { type, collection, id, fields, cleared, payload } = action;
 
   switch (type) {
+
+    // Cache user
+    case 'SET_USER': {
+      return {
+        ...state,
+        RNMO_USER: payload,
+      };
+    }
 
     // Add new item to recently added array
     case 'RECENTLY_ADDED': {
