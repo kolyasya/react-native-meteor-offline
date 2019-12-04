@@ -2,7 +2,7 @@ import Meteor, { getData } from 'react-native-meteor';
 import _ from 'lodash';
 
 const initialState = { 
-  RNMO_RECENTLY_ADDED: [],
+  // RNMO_RECENTLY_ADDED: [],
   RNMO_USER: null,
 };
 
@@ -34,7 +34,7 @@ const meteorReduxReducers = (
     }
 
     case 'ADDED': {
-      console.log("ADDED", fields);
+      // console.log("ADDED", fields);
       return {
         ...state,
         [collection]: { 

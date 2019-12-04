@@ -3,7 +3,7 @@ import Meteor from 'react-native-meteor';
 const registerDDPEvents = ({ store }) => {
   Meteor.waitDdpConnected(() => {
     let connected = true;
-    
+
     Meteor.ddp.on('disconnected', () => {
       connected = false;
     });

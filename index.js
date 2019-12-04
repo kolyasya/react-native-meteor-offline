@@ -55,8 +55,7 @@ const initMeteorRedux = ({
   // Figure out why do we have timeout here
   // Seems like there should be some kind of event listener
   setTimeout(() => restoreCollections({ store,  }), 300);
-
-  registerDDPEvents({ store });
+  setTimeout(() => registerDDPEvents({ store }), 350);
 
   return { store, persistor };
 };

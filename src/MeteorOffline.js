@@ -2,9 +2,6 @@ import Meteor from 'react-native-meteor';
 import { AsyncStorage } from 'react-native';
 import _ from 'lodash';
 
-purge = null;
-getAsyncStorageItem = item => AsyncStorage.getItem(item).then(r => console.log(r));
-
 export default class MeteorOffline {
   constructor(options = {}) {
     this.offline = true;
@@ -33,7 +30,7 @@ export default class MeteorOffline {
     }
     // Return user from cache
     const { RNMO_USER } = this.store.getState();
-    console.log('Return cached user', RNMO_USER);
+    // console.log('Return cached user', RNMO_USER);
     return RNMO_USER;
   }
 
@@ -78,7 +75,7 @@ export default class MeteorOffline {
     // React-native-meteor clears MiniMongo collections on reconnect
     // https://github.com/inProgress-team/react-native-meteor/blob/master/src/Meteor.js#L97
     // Need to figure out way to handle this situations
-    console.log('RETURN COLLECTION', collection, subscriptionName, Meteor.collection(collection).find({}), Meteor.collection(collection));
+    // console.log('RETURN COLLECTION', collection, subscriptionName, Meteor.collection(collection).find({}), Meteor.collection(collection));
 
     this.collections = _.uniq([...this.collections, collection]);
     return Meteor.collection(collection);
