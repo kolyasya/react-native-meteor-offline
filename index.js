@@ -19,7 +19,7 @@ reconnect = () => {
   Meteor.reconnect();
 }
 
-setTimeout(() => disconnect(), 1000);
+// setTimeout(() => disconnect(), 1000);
 
 const initMeteorRedux = ({
   customReducers,

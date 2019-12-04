@@ -34,7 +34,7 @@ const meteorReduxReducers = (
     }
 
     case 'ADDED': {
-      console.log("ADDDED", fields);
+      console.log("ADDED", fields);
       return {
         ...state,
         [collection]: { 

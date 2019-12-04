@@ -32,7 +32,6 @@
     "events": "^1.1.1",
     "lodash": "^4.17.4",
     "next-frame": "^0.2.3",
-    "react-native-meteor": "^1.0.3",
     "redux": "^4.0.4",
     "redux-persist": "^6.0.0"
   }
