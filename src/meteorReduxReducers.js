@@ -12,13 +12,12 @@ const meteorReduxReducers = (
   const { type, collection, id, fields, cleared, payload } = action;
 
   switch (type) {
-
     // Cache user
     case 'SET_USER': {
-      return {
-        ...state,
-        RNMO_USER: payload,
-      };
+      const newState = { ...state };
+      if (payload && payload._id)
+        newState.RNMO_USER = payload;
+      return newState;
     }
 
     case 'ADDED': {

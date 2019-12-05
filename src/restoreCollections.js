@@ -9,7 +9,7 @@ const restoreCollections = ({ store }) => {
 
   Object.keys(store.getState().METEOR_REDUX_REDUCERS).map(collectionName => {
 
-    if (['ready', 'RNMO_RECENTLY_ADDED'].includes(collectionName)) return;
+    if (['ready', 'RNMO_RECENTLY_ADDED', 'RNMO_USER'].includes(collectionName)) return;
 
     // console.log('');
     // console.log('RESTORRING COLLECTION', collectionName);

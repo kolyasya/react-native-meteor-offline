@@ -29,8 +29,7 @@ export default class MeteorOffline {
       return user;
     }
     // Return user from cache
-    const { RNMO_USER } = this.store.getState();
-    // console.log('Return cached user', RNMO_USER);
+    const { METEOR_REDUX_REDUCERS: { RNMO_USER } } = this.store.getState();
     return RNMO_USER;
   }
 
