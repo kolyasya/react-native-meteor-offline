@@ -22,15 +22,17 @@ export default class MeteorOffline {
 
   user() {
     const user = Meteor.user();
+    const currentState = this.store.getState();
+    const cachedUser = currentState && currentState.METEOR_REDUX_REDUCERS && currentState.RNMO_USER;
 
     // If we have user loaded
-    if (user) {
+    // TODO: Maybe need to update user on time interval as well
+    if (user && (!cachedUser || user._id !== cachedUser._id)) {
       this.store.dispatch({ type: 'SET_USER', payload: user });
       return user;
     }
     // Return user from cache
-    const { METEOR_REDUX_REDUCERS: { RNMO_USER } } = this.store.getState();
-    return RNMO_USER;
+    return cachedUser;
   }
 
   subscribe(uniqueName, name, ...params) {
