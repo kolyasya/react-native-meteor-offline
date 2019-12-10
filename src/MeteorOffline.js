@@ -1,5 +1,5 @@
 import Meteor from 'react-native-meteor';
-import { AsyncStorage } from 'react-native';
+import { getData } from 'react-native-meteor';
 import _ from 'lodash';
 
 export default class MeteorOffline {
@@ -10,10 +10,26 @@ export default class MeteorOffline {
     this.collections = [];
 
     this.store = options.store;
+    this.persistor = options.persistor;
 
     Meteor.waitDdpConnected(() => {
       this.offline = (Meteor.ddp.status === 'connected') ? false : true;
     });
+  }
+
+  reset() {
+    // Clear persist cache
+    if (this.persistor) this.persistor.purge();
+
+    // Clear MiniMongo data
+    const data = getData();
+    if (data && data.db && data.db.collections) {
+      // Go through all colelctions and clean up
+      for (let collection in data.db.collections) {
+        const currentCollection = data.db[collection];
+        if (currentCollection && currentCollection.remove) currentCollection.remove({});
+      }
+    }
   }
 
   subReady (uniqueName) {
