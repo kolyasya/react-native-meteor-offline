@@ -6,7 +6,7 @@ export default class MeteorOffline {
   constructor(options = {}) {
     this.offline = true;
 
-    this.subscriptions = [];
+    this.subscriptions = {};
     this.collections = [];
 
     this.store = options.store;
