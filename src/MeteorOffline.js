@@ -83,7 +83,9 @@ export default class MeteorOffline {
       const callback = _.once(params[params.length - 1]);
       callback();
     }
-    this.subscriptions[uniqueName] && this.subscriptions[uniqueName].ready = subHandle.ready();
+    if (this.subscriptions[uniqueName]) {
+      this.subscriptions[uniqueName].ready = subHandle.ready();
+    }
 
     return subHandle;
   }
