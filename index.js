@@ -1,7 +1,7 @@
 import Meteor from 'react-native-meteor';
 import { createStore, combineReducers } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist';
-import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import meteorReduxReducers from './src/meteorReduxReducers';
 import MeteorOffline from './src/MeteorOffline';
