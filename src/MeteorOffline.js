@@ -4,17 +4,13 @@ import _ from 'lodash';
 
 export default class MeteorOffline {
   constructor(options = {}) {
-    this.offline = true;
+    this.offline = false;
 
     this.subscriptions = {};
     this.collections = [];
 
     this.store = options.store;
     this.persistor = options.persistor;
-
-    Meteor.waitDdpConnected(() => {
-      this.offline = (Meteor.ddp.status === 'connected') ? false : true;
-    });
   }
 
   reset() {
@@ -54,6 +50,7 @@ export default class MeteorOffline {
   subscribe(uniqueName, name, ...params) {
     const hasCallback = typeof params[params.length - 1] === 'function';
     const justParams = params.slice(0, params.length - 1);
+    const state = this.store.getState();
 
     _.set(this.subscriptions, `${uniqueName}.${name}`, name);
     _.set(
@@ -62,30 +59,29 @@ export default class MeteorOffline {
       JSON.stringify(justParams)
     );
 
-    let subHandle = Meteor.subscribe(name, ...params);
-    if (this.offline) {
-      subHandle = {
+    // If we are disconnected we are ready
+    let subHandle = state.METEOR_REDUX_REDUCERS.RNMO_DDP_CONNECTED ? 
+      Meteor.subscribe(name, ...params)
+      : {
         ready: () => {
-          // ready === rehydrated
-          return this.store.getState().ready || false;
+          return true;
         },
         offline: this.offline,
       };
-    }
+
+
     // run callback if it's offline and ready for the first time
     if (
       this.offline &&
       hasCallback &&
-      this.store.getState().ready &&
+      state.ready &&
       !this.subscriptions[uniqueName].ready
     ) {
       // handled by meteor.subscribe if online
       const callback = _.once(params[params.length - 1]);
       callback();
     }
-    if (this.subscriptions[uniqueName]) {
-      this.subscriptions[uniqueName].ready = subHandle.ready();
-    }
+    this.subscriptions[uniqueName].ready = subHandle.ready();
 
     return subHandle;
   }

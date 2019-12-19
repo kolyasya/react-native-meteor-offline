@@ -3,6 +3,7 @@ import _ from 'lodash';
 
 const initialState = { 
   RNMO_USER: null,
+  RNMO_DDP_CONNECTED: false
 };
 
 const meteorReduxReducers = (
@@ -75,6 +76,12 @@ const meteorReduxReducers = (
       }
       return state;
       
+    case 'SET_DDP_CONNECTED':
+      return {
+        ...state,
+        RNMO_DDP_CONNECTED: !!action.payload
+      };
+
     case 'HARDRESET':
       return {};
 
