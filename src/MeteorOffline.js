@@ -43,12 +43,16 @@ export default class MeteorOffline {
 
     // Return current user if connected, cached user if not, null in all other cases
     // TODO: Maybe need to update user on time interval as well
-    if (user && (!cachedUser || user._id !== cachedUser._id)) {
-      this.store.dispatch({ type: 'SET_USER', payload: user });
+    if (user) {
+      // If user has changed - cache it
+      if (!_.isEqual(user, cachedUser)) {
+        this.store.dispatch({ type: 'SET_USER', payload: user });
+      }
       return user;
     } else if (cachedUser && cachedUser._id) {
       return cachedUser
-    } else return null;
+    } else 
+      return null;
   }
 
   subscribe(uniqueName, name, ...params) {
@@ -72,21 +76,23 @@ export default class MeteorOffline {
         offline: this.offline,
       };
     }
-    // run callback if it's offline and ready for the first time
-    if (
-      this.offline &&
-      hasCallback &&
-      this.store.getState().ready &&
-      !this.subscriptions[uniqueName].ready
-    ) {
-      // handled by meteor.subscribe if online
-      const callback = _.once(params[params.length - 1]);
-      callback();
-    }
+
     if (this.subscriptions[uniqueName]) {
       this.subscriptions[uniqueName].ready = subHandle.ready();
     }
 
+    // run callback if it's offline and ready for the first time
+    // if (
+    //   this.offline &&
+    //   hasCallback &&
+    //   this.store.getState().ready &&
+    //   !this.subscriptions[uniqueName].ready
+    // ) {
+    //   // handled by meteor.subscribe if online
+    //   const callback = _.once(params[params.length - 1]);
+    //   callback();
+    // }
+  
     return subHandle;
   }
 
