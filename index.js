@@ -1,7 +1,7 @@
 import Meteor from 'react-native-meteor';
 import { createStore, combineReducers } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist';
-import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import meteorReduxReducers from './src/meteorReduxReducers';
 import MeteorOffline from './src/MeteorOffline';
@@ -26,7 +26,6 @@ const initMeteorRedux = ({
   preloadedState,
   enhancer,
 }) => {
-
   // Combine passed app reducers with our RNMO reducers
   const combinedReducers = customReducers !== undefined
     ? combineReducers({ ...customReducers, METEOR_REDUX_REDUCERS: meteorReduxReducers })
@@ -36,7 +35,7 @@ const initMeteorRedux = ({
     key: 'root',
     storage: AsyncStorage,
     debounce: 1000,
-    // whitelist: ['METEOR_REDUX_REDUCERS'],
+    whitelist: ['METEOR_REDUX_REDUCERS'],
   }, combinedReducers);
 
   const store = createStore(
