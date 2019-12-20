@@ -1,7 +1,7 @@
 {
   "name": "react-native-meteor-offline",
-  "version": "2.2.7",
-  "description": "Link react-native-meteor to redux",
+  "version": "3.0.0",
+  "description": "Work with Meteor MiniMongo collections offline with redux and redux-persist",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,25 +13,18 @@
   "keywords": [
     "react",
     "native",
-    "react",
-    "native",
     "meteor",
     "redux",
-    "react",
-    "native",
-    "meteor",
-    "redux"
+    "offline"
   ],
-  "author": "Designman",
+  "author": "kolyasya",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kolyasya/react-native-meteor-offline/issues"
   },
   "homepage": "https://github.com/kolyasya/react-native-meteor-offline#readme",
   "dependencies": {
-    "events": "^1.1.1",
     "lodash": "^4.17.4",
-    "next-frame": "^0.2.3",
     "redux": "^4.0.4",
     "redux-persist": "^6.0.0"
   }

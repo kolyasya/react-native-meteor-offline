@@ -39,7 +39,7 @@ export default class MeteorOffline {
   user() {
     const user = Meteor.user();
     const currentState = this.store.getState();
-    const cachedUser = currentState && currentState.METEOR_REDUX_REDUCERS && currentState.RNMO_USER;
+    const cachedUser = currentState && currentState.METEOR_REDUX_REDUCERS && currentState.METEOR_REDUX_REDUCERS.RNMO_USER;
 
     // Return current user if connected, cached user if not, null in all other cases
     // TODO: Maybe need to update user on time interval as well
