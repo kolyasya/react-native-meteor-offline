@@ -2,6 +2,7 @@ import Meteor, { getData } from 'react-native-meteor';
 import _ from 'lodash';
 
 const initialState = { 
+  RNMO_RESTORED: false,
   RNMO_USER: null,
   RNMO_DDP_CONNECTED: false
 };
@@ -58,11 +59,10 @@ const meteorReduxReducers = (
       // console.error(`Couldn't remove ${id}, not found in ${collection} collection`);
       return state;
 
-    case 'SET_READY':
-      // todo: check for removed docs
+    case 'SET_RESTORED':
       return {
         ...state,
-        ready: action.ready,
+        RNMO_RESTORED: action.payload,
       };
       
     case 'persist/REHYDRATE':
@@ -81,9 +81,6 @@ const meteorReduxReducers = (
         ...state,
         RNMO_DDP_CONNECTED: !!action.payload
       };
-
-    case 'HARDRESET':
-      return {};
 
     default:
       return state;

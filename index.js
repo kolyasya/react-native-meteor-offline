@@ -19,7 +19,7 @@ disconnect = () => {
 reconnect = () => {
   Meteor.reconnect();
 }
-// setTimeout(() => disconnect(), 1000);
+// setTimeout(() => disconnect(), 0);
 // <<<<<<<<<<<<<<
 
 const initMeteorRedux = ({
@@ -50,10 +50,19 @@ const initMeteorRedux = ({
   // Temporary for development
   globalPersistor = persistor;
 
-  // Figure out why do we have timeout here
-  // Seems like there should be some kind of event listener
-  setTimeout(() => restoreCollections({ store }), 300);
-  setTimeout(() => registerDDPEvents({ store }), 350);
+  // Once persist finished rehydration (restoring data from AsyncStorage to redux)
+  // run restoring to MiniMongo and register DDP events
+  let previousRehydrated = store.getState()._persist.rehydrated;
+  store.subscribe(() => {
+    const rehydrated = store.getState()._persist.rehydrated;
+    if (!previousRehydrated && rehydrated) {
+      previousRehydrated = rehydrated;
+      restoreCollections({ store });
+      registerDDPEvents({ store })
+    } else {
+      previousRehydrated = rehydrated;
+    }
+  });
 
   return { store, persistor };
 };

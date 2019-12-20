@@ -3,16 +3,18 @@ import _ from 'lodash';
 
 const restoreCollections = ({ store }) => {
 
-  // console.log('STARTING RESTORE')
+//  console.log('STARTING RESTORE')
 
-  // console.log(store.getState().METEOR_REDUX_REDUCERS);
+//  console.log(store.getState().METEOR_REDUX_REDUCERS);
 
   Object.keys(store.getState().METEOR_REDUX_REDUCERS).map(collectionName => {
+  //  console.log('');
+    
+    if (['RNMO_RESTORED', 'RNMO_RECENTLY_ADDED', 'RNMO_USER', 'RNMO_DDP_CONNECTED'].includes(collectionName)) {
+      return console.log(`Collection ${collectionName} skipped`);
+    }
 
-    if (['ready', 'RNMO_RECENTLY_ADDED', 'RNMO_USER'].includes(collectionName)) return;
-
-    // console.log('');
-    // console.log('RESTORRING COLLECTION', collectionName);
+  //  console.log('RESTORRING COLLECTION', collectionName);
 
     const persistDocuments = store.getState().METEOR_REDUX_REDUCERS[collectionName];
 
@@ -22,11 +24,11 @@ const restoreCollections = ({ store }) => {
                                   Object.keys(persistDocuments).map(k => ({ ...persistDocuments[k], _id: k })) : 
                                   [];
 
-    // console.log({ persistDocumentsFixed });
+  //  console.log({ persistDocumentsFixed });
 
     // add the collection if it doesn't exist
     if (!getData().db[collectionName]) {
-      // console.log(`Collection ${collectionName} doesn't exist, adding to Mini Mongo...`)
+    //  console.log(`Collection ${collectionName} doesn't exist, adding to Mini Mongo...`)
       // add collection to minimongo
       getData().db.addCollection(collectionName);
     }
@@ -35,14 +37,13 @@ const restoreCollections = ({ store }) => {
 
     // only upsert if the data doesn't match
     if (!_.isEqual(getData().db[collectionName], persistDocuments)) {
-      // console.log(`Collection ${collectionName} are different, upserting...`)
+    //  console.log(`Collection ${collectionName} are different, upserting...`)
       // add documents to collection
       getData().db[collectionName].upsert(persistDocumentsFixed);
     }
   });
 
-  // Set ready to true so the app can use our GroundedPublication
-  store.dispatch({ type: 'SET_READY', ready: true });
+  store.dispatch({ type: 'SET_RESTORED', payload: true });
 }
 
 export default restoreCollections;
