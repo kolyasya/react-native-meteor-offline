@@ -10,6 +10,7 @@ import returnCached from './src/returnCached';
 import restoreCollections from './src/restoreCollections';
 import registerDDPEvents from './src/registerDDPEvents';
 
+// >>>>>>>>>>>>>> Functions for development
 globalPersistor = '';
 disconnect = () => {
   Meteor.disconnect();
@@ -18,8 +19,8 @@ disconnect = () => {
 reconnect = () => {
   Meteor.reconnect();
 }
-
 // setTimeout(() => disconnect(), 1000);
+// <<<<<<<<<<<<<<
 
 const initMeteorRedux = ({
   customReducers,
@@ -46,7 +47,7 @@ const initMeteorRedux = ({
 
   persistor = persistStore(store);
 
-  // Temporary
+  // Temporary for development
   globalPersistor = persistor;
 
   // Figure out why do we have timeout here
