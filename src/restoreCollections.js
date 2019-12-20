@@ -11,7 +11,8 @@ const restoreCollections = ({ store }) => {
   //  console.log('');
     
     if (['RNMO_RESTORED', 'RNMO_RECENTLY_ADDED', 'RNMO_USER', 'RNMO_DDP_CONNECTED'].includes(collectionName)) {
-      return console.log(`Collection ${collectionName} skipped`);
+      // console.log(`Collection ${collectionName} skipped`);
+      return;
     }
 
   //  console.log('RESTORRING COLLECTION', collectionName);
