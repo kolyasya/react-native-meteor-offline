@@ -4,13 +4,17 @@ import _ from 'lodash';
 
 export default class MeteorOffline {
   constructor(options = {}) {
-    this.offline = false;
+    this.offline = true;
 
     this.subscriptions = {};
     this.collections = [];
 
     this.store = options.store;
     this.persistor = options.persistor;
+
+    Meteor.waitDdpConnected(() => {
+      this.offline = (Meteor.ddp.status === 'connected') ? false : true;
+    });
   }
 
   reset() {
@@ -37,20 +41,19 @@ export default class MeteorOffline {
     const currentState = this.store.getState();
     const cachedUser = currentState && currentState.METEOR_REDUX_REDUCERS && currentState.RNMO_USER;
 
-    // If we have user loaded
+    // Return current user if connected, cached user if not, null in all other cases
     // TODO: Maybe need to update user on time interval as well
     if (user && (!cachedUser || user._id !== cachedUser._id)) {
       this.store.dispatch({ type: 'SET_USER', payload: user });
       return user;
-    }
-    // Return user from cache
-    return cachedUser;
+    } else if (cachedUser && cachedUser._id) {
+      return cachedUser
+    } else return null;
   }
 
   subscribe(uniqueName, name, ...params) {
     const hasCallback = typeof params[params.length - 1] === 'function';
     const justParams = params.slice(0, params.length - 1);
-    const state = this.store.getState();
 
     _.set(this.subscriptions, `${uniqueName}.${name}`, name);
     _.set(
@@ -59,29 +62,30 @@ export default class MeteorOffline {
       JSON.stringify(justParams)
     );
 
-    // If we are disconnected we are ready
-    let subHandle = state.METEOR_REDUX_REDUCERS.RNMO_DDP_CONNECTED ? 
-      Meteor.subscribe(name, ...params)
-      : {
+    let subHandle = Meteor.subscribe(name, ...params);
+    if (this.offline) {
+      subHandle = {
         ready: () => {
-          return true;
+          // ready === rehydrated
+          return this.store.getState().ready || false;
         },
         offline: this.offline,
       };
-
-
+    }
     // run callback if it's offline and ready for the first time
     if (
       this.offline &&
       hasCallback &&
-      state.ready &&
+      this.store.getState().ready &&
       !this.subscriptions[uniqueName].ready
     ) {
       // handled by meteor.subscribe if online
       const callback = _.once(params[params.length - 1]);
       callback();
     }
-    this.subscriptions[uniqueName].ready = subHandle.ready();
+    if (this.subscriptions[uniqueName]) {
+      this.subscriptions[uniqueName].ready = subHandle.ready();
+    }
 
     return subHandle;
   }
