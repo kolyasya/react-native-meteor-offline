@@ -66,8 +66,8 @@ export default class MeteorOffline {
     if (this.offline) {
       subHandle = {
         ready: () => {
-          // ready === rehydrated
-          return this.store.getState().ready || false;
+          // TODO: check here if we recovered everything from AsyncStorage (Persist)
+          return true;
         },
         offline: this.offline,
       };
