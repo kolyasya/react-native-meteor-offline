@@ -33,6 +33,7 @@ const initMeteorRedux = ({
     : combineReducers({ METEOR_REDUX_REDUCERS: meteorReduxReducers });
 
   const persistedReducer = persistReducer({
+    timeout: 0,
     key: 'root',
     storage: AsyncStorage,
     debounce: 1000,
