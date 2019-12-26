@@ -1,6 +1,19 @@
 import Meteor from 'react-native-meteor';
+import { batch } from 'react-redux'
+import _ from 'lodash';
 
+// Using queue to batch actions because sometimes DDP sends a lot of actions at the same time
+let queue = [];
 let DDPEventsRegistered = false;
+
+const sync = _.debounce(store => {
+  batch(() => {
+    queue && queue.length && queue.map(a => store.dispatch(a));
+  });
+  // Clear queue on successful sync
+  queue = [];
+}, 500);
+
 
 const registerDDPEvents = ({ store }) => {
   Meteor.ddp.on('connected', () => {
@@ -13,15 +26,18 @@ const registerDDPEvents = ({ store }) => {
       });
     
       Meteor.ddp.on('removed', ({ collection, id, fields = {} }) => {
-        store.dispatch({ type: 'REMOVED', collection, id, fields });
+        queue.push({ type: 'REMOVED', collection, id, fields });
+        sync(store);
       });
     
       Meteor.ddp.on('changed', ({ collection, id, fields = {}, cleared = [] }) => {
-        store.dispatch({ type: 'CHANGED', collection, id, fields, cleared });
+        queue.push({ type: 'CHANGED', collection, id, fields, cleared });
+        sync(store);
       });
     
       Meteor.ddp.on('added', ({ collection, id, fields = {} }, ...args) => {
-        store.dispatch({ type: 'ADDED', collection, id, fields });  
+        queue.push({ type: 'ADDED', collection, id, fields });
+        sync(store);
       });
 
       DDPEventsRegistered = true;
