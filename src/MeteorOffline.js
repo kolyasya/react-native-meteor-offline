@@ -56,44 +56,39 @@ export default class MeteorOffline {
   }
 
   subscribe(uniqueName, name, ...params) {
-    const hasCallback = typeof params[params.length - 1] === 'function';
-    const justParams = params.slice(0, params.length - 1);
+    const createNewSubscription = (name, params) => {
+      let subHandle;
 
-    _.set(this.subscriptions, `${uniqueName}.${name}`, name);
-    _.set(
-      this.subscriptions,
-      `${uniqueName}.${params}`,
-      JSON.stringify(justParams)
-    );
+      subHandle = Meteor.subscribe(name, ...params);
 
-    let subHandle = Meteor.subscribe(name, ...params);
-    if (this.offline) {
-      subHandle = {
-        ready: () => {
-          // TODO: check here if we recovered everything from AsyncStorage (Persist)
-          return true;
-        },
-        offline: this.offline,
+      if (this.offline) {
+        subHandle = {
+          ready: () => {
+            return true;
+          },
+          offline: this.offline,
+        };
+      }
+
+      this.subscriptions[uniqueName] = {
+        name,
+        params: JSON.stringify(justParams),
+        handle: subHandle
       };
+
+      return subHandle;
     }
 
-    if (this.subscriptions[uniqueName]) {
-      this.subscriptions[uniqueName].ready = subHandle.ready();
-    }
+    const hasCallback = typeof params[params.length - 1] === 'function';
+    const justParams = hasCallback ? params.slice(0, params.length - 1) : params[0];
 
-    // run callback if it's offline and ready for the first time
-    // if (
-    //   this.offline &&
-    //   hasCallback &&
-    //   this.store.getState().ready &&
-    //   !this.subscriptions[uniqueName].ready
-    // ) {
-    //   // handled by meteor.subscribe if online
-    //   const callback = _.once(params[params.length - 1]);
-    //   callback();
-    // }
-  
-    return subHandle;
+    const existingSub = this.subscriptions[uniqueName];
+
+    if (existingSub && existingSub.name === name && existingSub.params === justParams) {
+      return existingSub.handle;
+    } else {
+      return createNewSubscription(name, params);
+    }
   }
 
   collection(collection, subscriptionName) {
