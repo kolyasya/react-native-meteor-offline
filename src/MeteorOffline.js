@@ -50,7 +50,10 @@ export default class MeteorOffline {
       }
       return user;
     } else if (cachedUser && cachedUser._id) {
-      return cachedUser
+      return {
+        ...cachedUser,
+        RNMO_CACHED: true,
+      }
     } else 
       return null;
   }
