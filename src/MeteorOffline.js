@@ -87,7 +87,7 @@ export default class MeteorOffline {
 
     const existingSub = this.subscriptions[uniqueName];
 
-    if (existingSub && existingSub.name === name && existingSub.params === justParams) {
+    if (existingSub && existingSub.name === name && existingSub.params === JSON.stringify(justParams)) {
       return existingSub.handle;
     } else {
       return createNewSubscription(name, params);
