@@ -94,6 +94,23 @@ export default class MeteorOffline {
     }
   }
 
+  unsubscribeAll({ whitelist = [] }) {
+    if (!this.subscriptions) return;
+
+    // Stop all subscriptions if they are not in a whitelist
+    Object.keys(this.subscriptions).map(subscriptionName => {
+      if (
+        !whitelist.includes(subscriptionName) && 
+        this.subscriptions[subscriptionName] && 
+        this.subscriptions[subscriptionName].handle && 
+        this.subscriptions[subscriptionName].handle.stop
+      ) {
+        this.subscriptions[subscriptionName].handle.stop();
+        delete this.subscriptions[subscriptionName];
+      }
+    });
+  }
+
   collection(collection, subscriptionName) {
     // React-native-meteor clears MiniMongo collections on reconnect
     // https://github.com/inProgress-team/react-native-meteor/blob/master/src/Meteor.js#L97
