@@ -66,6 +66,11 @@ export default class MeteorOffline {
     const createNewSubscription = (name, params) => {
       let subHandle;
 
+      subHandle = Meteor.subscribe(name, ...params, {
+        // When subscription is stopped removing it from this.subscriptions
+        onStop: () => this.deleteSubscription(uniqueName)
+      });
+
       if (this.offline) {
         subHandle = {
           ready: () => {
@@ -73,11 +78,6 @@ export default class MeteorOffline {
           },
           offline: this.offline,
         };
-      } else {
-        subHandle = Meteor.subscribe(name, ...params, {
-          // When subscription is stopped removing it from this.subscriptions
-          onStop: () => this.deleteSubscription(uniqueName)
-        });
       }
 
       this.subscriptions[uniqueName] = {
@@ -85,6 +85,8 @@ export default class MeteorOffline {
         params: JSON.stringify(justParams),
         handle: subHandle
       };
+
+      console.log(this.subscriptions);
 
       return subHandle;
     }
