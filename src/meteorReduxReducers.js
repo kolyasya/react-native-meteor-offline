@@ -82,6 +82,11 @@ const meteorReduxReducers = (
         RNMO_DDP_CONNECTED: !!action.payload
       };
 
+    case 'RESET':
+      return {
+        ...initialState
+      };
+
     default:
       return state;
   }

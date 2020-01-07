@@ -30,6 +30,8 @@ export default class MeteorOffline {
         if (currentCollection && currentCollection.remove) currentCollection.remove({});
       }
     }
+
+    this.store.dispatch({ type: 'RESET' });
   }
 
   subReady (uniqueName) {
@@ -47,6 +49,8 @@ export default class MeteorOffline {
       // If user has changed - cache it
       if (!_.isEqual(user, cachedUser)) {
         this.store.dispatch({ type: 'SET_USER', payload: user });
+      } else {
+        // console.log('Users are equal', user, cachedUser);
       }
       return user;
     } else if (cachedUser && cachedUser._id) {
