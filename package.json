@@ -1,6 +1,6 @@
 {
   "name": "react-native-meteor-offline",
-  "version": "3.0.14",
+  "version": "3.0.15",
   "description": "Work with Meteor MiniMongo collections offline with redux and redux-persist",
   "main": "index.js",
   "scripts": {

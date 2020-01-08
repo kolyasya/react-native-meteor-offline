@@ -4,14 +4,13 @@ import _ from 'lodash';
 
 export default class MeteorOffline {
   constructor(options = {}) {
-    this.offline = true;
-
     this.subscriptions = {};
     this.collections = [];
 
     this.store = options.store;
     this.persistor = options.persistor;
 
+    this.offline = true;
     Meteor.waitDdpConnected(() => {
       this.offline = (Meteor.ddp.status === 'connected') ? false : true;
     });
@@ -79,24 +78,23 @@ export default class MeteorOffline {
 
       this.subscriptions[uniqueName] = {
         name,
-        params: JSON.stringify(justParams),
+        params: JSON.stringify(params),
         handle: subHandle
       };
-
-      console.log(this.subscriptions);
 
       return subHandle;
     }
 
+    // If the last param is a function
     const hasCallback = typeof params[params.length - 1] === 'function';
-    const justParams = hasCallback ? params.slice(0, params.length - 1) : params[0];
+    const subscriptionParams = hasCallback ? params.slice(0, params.length - 1) : params[0];
 
     const existingSub = this.subscriptions[uniqueName];
 
-    if (existingSub && existingSub.name === name && existingSub.params === JSON.stringify(justParams)) {
+    if (existingSub && existingSub.name === name && existingSub.params === JSON.stringify(subscriptionParams)) {
       return existingSub.handle;
     } else {
-      return createNewSubscription(name, params);
+      return createNewSubscription(name, subscriptionParams);
     }
   }
 
@@ -122,11 +120,6 @@ export default class MeteorOffline {
   }
 
   collection(collection, subscriptionName) {
-    // React-native-meteor clears MiniMongo collections on reconnect
-    // https://github.com/inProgress-team/react-native-meteor/blob/master/src/Meteor.js#L97
-    // Need to figure out way to handle this situations
-    // console.log('RETURN COLLECTION', collection, subscriptionName, Meteor.collection(collection).find({}), Meteor.collection(collection));
-
     this.collections = _.uniq([...this.collections, collection]);
     return Meteor.collection(collection);
   }
