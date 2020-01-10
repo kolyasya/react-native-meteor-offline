@@ -67,14 +67,6 @@ export default class MeteorOffline {
 
       subHandle = Meteor.subscribe(name, ...params);
 
-      if (this.offline) {
-        subHandle = {
-          ready: () => {
-            return true;
-          },
-          offline: this.offline,
-        };
-      }
 
       this.subscriptions[uniqueName] = {
         name,
@@ -90,10 +82,15 @@ export default class MeteorOffline {
     const subscriptionParams = hasCallback ? params.slice(0, params.length - 1) : params[0];
 
     const existingSub = this.subscriptions[uniqueName];
+    const cacheHit =
+        existingSub &&
+        existingSub.name === name &&
+        existingSub.params === JSON.stringify(subscriptionParams)
 
-    if (existingSub && existingSub.name === name && existingSub.params === JSON.stringify(subscriptionParams)) {
+    if (cacheHit) {
       return existingSub.handle;
     } else {
+      // console.log(`MeteorOffline.subscribe : cache miss for ${name} **********************************************************************************`);
       return createNewSubscription(name, subscriptionParams);
     }
   }
