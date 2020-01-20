@@ -67,6 +67,11 @@ export default class MeteorOffline {
 
       subHandle = Meteor.subscribe(name, ...params);
 
+      // Adding timestamps for logging in the App
+      if (subHandle) {
+        subHandle.createdAt = new Date();
+        subHandle.lastRequestedAt = new Date();
+      }
 
       this.subscriptions[uniqueName] = {
         name,
@@ -88,6 +93,10 @@ export default class MeteorOffline {
         existingSub.params === JSON.stringify(subscriptionParams)
 
     if (cacheHit) {
+      // Updating existing timestamp
+      if (existingSub.handle) {
+        existingSub.handle.lastRequestedAt = new Date();
+      }
       return existingSub.handle;
     } else {
       // console.log(`MeteorOffline.subscribe : cache miss for ${name} **********************************************************************************`);
