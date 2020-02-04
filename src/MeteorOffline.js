@@ -1,4 +1,4 @@
-import Meteor from 'react-native-meteor';
+import Meteor, { Tracker } from 'react-native-meteor';
 import { getData } from 'react-native-meteor';
 import _ from 'lodash';
 
@@ -33,7 +33,7 @@ export default class MeteorOffline {
     this.store.dispatch({ type: 'RESET' });
   }
 
-  subReady (uniqueName) {
+  subReady(uniqueName) {
     return this.subscriptions[uniqueName].ready && !this.offline;
   }
 
@@ -57,7 +57,7 @@ export default class MeteorOffline {
         ...cachedUser,
         RNMO_CACHED: true,
       }
-    } else 
+    } else
       return null;
   }
 
@@ -70,7 +70,9 @@ export default class MeteorOffline {
       // Adding timestamps for logging in the App
       if (subHandle) {
         subHandle.createdAt = new Date();
-        subHandle.lastRequestedAt = new Date();
+        Tracker.autorun(() => {
+          subHandle.lastRequestedAt = new Date();
+        });
       }
 
       this.subscriptions[uniqueName] = {
@@ -88,14 +90,16 @@ export default class MeteorOffline {
 
     const existingSub = this.subscriptions[uniqueName];
     const cacheHit =
-        existingSub &&
-        existingSub.name === name &&
-        existingSub.params === JSON.stringify(subscriptionParams)
+      existingSub &&
+      existingSub.name === name &&
+      existingSub.params === JSON.stringify(subscriptionParams)
 
     if (cacheHit) {
       // Updating existing timestamp
       if (existingSub.handle) {
-        existingSub.handle.lastRequestedAt = new Date();
+        Tracker.autorun(() => {
+          existingSub.handle.lastRequestedAt = new Date();
+        });
       }
       return existingSub.handle;
     } else {
@@ -114,9 +118,9 @@ export default class MeteorOffline {
     // Stop all subscriptions if they are not in a whitelist
     Object.keys(this.subscriptions).map(subscriptionName => {
       if (
-        !whitelist.includes(subscriptionName) && 
-        this.subscriptions[subscriptionName] && 
-        this.subscriptions[subscriptionName].handle && 
+        !whitelist.includes(subscriptionName) &&
+        this.subscriptions[subscriptionName] &&
+        this.subscriptions[subscriptionName].handle &&
         this.subscriptions[subscriptionName].handle.stop
       ) {
         this.subscriptions[subscriptionName].handle.stop();
