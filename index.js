@@ -27,7 +27,7 @@ const initMeteorRedux = ({
   preloadedState,
   enhancer,
 }) => {
-  // Combine passed app reducers with our RNMO reducers
+  // Combine app's reducers with our RNMO reducers
   const combinedReducers = customReducers !== undefined
     ? combineReducers({ ...customReducers, METEOR_REDUX_REDUCERS: meteorReduxReducers })
     : combineReducers({ METEOR_REDUX_REDUCERS: meteorReduxReducers });
