@@ -23,11 +23,7 @@ const restoreCollections = ({ store }) => {
   // customDir(persistStateReducers);
   customLogging('');
 
-
-
   Object.keys(persistStateReducers).map(collectionName => {
-    // if (collectionName !== 'users') return;
-
     customLogging('');
     customLogging('');
     customLogging('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
@@ -67,16 +63,27 @@ const restoreCollections = ({ store }) => {
       getData().db.addCollection(collectionName);
     }
 
+    // Pick documents that are already in MiniMongo
+    // It means that we downloaded them already from server
+    const miniMongoDocuments = getData().db[collectionName]?.find();
     customLogging('ALREADY EXISTING DATA IN MINIMONGO COLLECTION');
-    customDir(getData().db[collectionName]?.items)
+    customLogging(miniMongoDocuments);
 
-    // I don't think that this code works correctly
-    // We need to find a nice way to compare data
-    // only upsert if the data doesn't match
-    if (!_.isEqual(getData().db[collectionName]?.items, persistDocuments)) {
-      customLogging(`Collection ${collectionName} are different, upserting...`)
-      // add documents to collection
-      getData().db[collectionName].upsert(persistDocumentsFixed);
+    // Comparing documents in persist storage 
+    // with documents in MiniMongo just by _id
+    const persistDocumentsToRestore = [];
+    persistDocumentsFixed?.map(pd => {
+      if (pd._id && !miniMongoDocuments.find(md => md._id === pd._id)) {
+        persistDocumentsToRestore.push(pd);
+      }
+    });
+
+    customLogging('DOCUMENTS TO RESTORE FROM PERSIST STORAGE');
+    customLogging(persistDocumentsToRestore);
+  
+    // If we have something to restore — do it
+    if (persistDocumentsToRestore?.length) {
+      getData().db[collectionName].upsert(persistDocumentsToRestore);
     }
   });
 
