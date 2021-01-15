@@ -1,10 +1,14 @@
 import Meteor, { getData } from 'react-native-meteor';
+
 import _ from 'lodash';
+
+import packagePrivateReducers from './packagePrivateReducers';
 
 const initialState = { 
   RNMO_RESTORED: false,
   RNMO_USER: null,
-  RNMO_DDP_CONNECTED: false
+  RNMO_DDP_CONNECTED: false,
+  RNMO_SUBSCRIPTIONS: {},
 };
 
 const meteorReduxReducers = (
@@ -76,15 +80,44 @@ const meteorReduxReducers = (
       }
       return state;
       
-    case 'SET_DDP_CONNECTED':
-      return {
+    case 'SET_DDP_CONNECTED': {
+      let newState = {
         ...state,
         RNMO_DDP_CONNECTED: !!action.payload
-      };
+      }
+
+      // if get back online
+      // we need to wipe all collections data
+      if (!state.RNMO_DDP_CONNECTED && !!action.payload) {
+        // _.difference(Object.keys(newState), packagePrivateReducers).map(r => {
+        //   const collectionToRemove = getData().db.collections[r];
+        //   if (collectionToRemove) {
+        //     console.log('Removing items from', r);
+        //     collectionToRemove.remove({});
+        //   }
+        //   return state[r] = [];
+        // });
+      }
+
+      return newState;
+    }
+      
 
     case 'RESET':
       return {
         ...initialState
+      };
+
+    case 'SET_SUBSCRIPTION':
+      const { payload } = action;
+      return {
+        ...state,
+        RNMO_SUBSCRIPTIONS: {
+          ...state.RNMO_SUBSCRIPTIONS,
+          [payload.name]: {
+            ready: payload.ready
+          }
+        }
       };
 
     default:

@@ -2,6 +2,8 @@ import Meteor, { Tracker } from 'react-native-meteor';
 import { getData } from 'react-native-meteor';
 import _ from 'lodash';
 
+import createNewSubscription from './createNewSubscription';
+
 export default class MeteorOffline {
   constructor(options = {}) {
     this.subscriptions = {};
@@ -62,28 +64,6 @@ export default class MeteorOffline {
   }
 
   subscribe(uniqueName, name, ...params) {
-    const createNewSubscription = (name, params) => {
-      let subHandle;
-
-      subHandle = Meteor.subscribe(name, ...params);
-
-      // Adding timestamps for logging in the App
-      if (subHandle) {
-        subHandle.createdAt = new Date();
-        Tracker.autorun(() => {
-          subHandle.lastRequestedAt = new Date();
-        });
-      }
-
-      this.subscriptions[uniqueName] = {
-        name,
-        params: JSON.stringify(params),
-        handle: subHandle
-      };
-
-      return subHandle;
-    }
-
     // If the last param is a function
     const hasCallback = typeof params[params.length - 1] === 'function';
     const subscriptionParams = hasCallback ? params.slice(0, params.length - 1) : params[0];
@@ -104,7 +84,7 @@ export default class MeteorOffline {
       return existingSub.handle;
     } else {
       // console.log(`MeteorOffline.subscribe : cache miss for ${name} **********************************************************************************`);
-      return createNewSubscription(name, subscriptionParams);
+      return createNewSubscription(this, uniqueName, name, subscriptionParams);
     }
   }
 

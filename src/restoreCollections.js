@@ -1,6 +1,8 @@
 import { getData } from 'react-native-meteor';
 import _ from 'lodash';
 
+import packagePrivateReducers from './packagePrivateReducers';
+
 // Using this function just to enable/disable logging easily
 const loggingEnabled = false;
 const customLogging = (...args) => {
@@ -16,6 +18,8 @@ const customDir = (...args) => {
 // And restores it into MiniMongo
 
 const restoreCollections = ({ store }) => {
+  console.log('Restoring collections from redux persist...');
+
   const persistStateReducers = store.getState().METEOR_REDUX_REDUCERS;
 
   customLogging('STARTING RESTORE')
@@ -37,7 +41,7 @@ const restoreCollections = ({ store }) => {
     customLogging('');
     
     // We don't restore such collections because they are technical
-    if (['RNMO_RESTORED', 'RNMO_RECENTLY_ADDED', 'RNMO_USER', 'RNMO_DDP_CONNECTED'].includes(collectionName)) {
+    if (packagePrivateReducers.includes(collectionName)) {
       customLogging(`Collection ${collectionName} skipped`);
       return;
     }
@@ -88,6 +92,7 @@ const restoreCollections = ({ store }) => {
   });
 
   store.dispatch({ type: 'SET_RESTORED', payload: true });
+  console.log('Restoring finished!');
 }
 
 export default restoreCollections;
