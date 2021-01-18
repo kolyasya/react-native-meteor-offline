@@ -1,4 +1,4 @@
-import Meteor, { getData } from 'react-native-meteor';
+import Meteor, { getData, Tracker } from 'react-native-meteor';
 import { batch } from 'react-redux'
 import _ from 'lodash';
 
@@ -22,22 +22,24 @@ const sync = _.debounce(store => {
 let needToCleanUp = false;
 
 const cleanUpCollections = () => {
+  console.log('Reconnected! Cleaning up collections...');
   // Cleaning up collections on reconnect
   const collectionsNames = Object.keys(getData().db.collections);
   collectionsNames?.map(cn => getData().db.collections[cn].remove({}));
   needToCleanUp = false;
 }
 
-
 const registerDDPEvents = ({ store }) => {
   console.log('Registering DDP events...');
+
   // Register events only for on a first connect
   // Don't know why connected only gets fired once
   // Have to update connection state in any other events as well
   if (!DDPEventsRegistered && Meteor.ddp) {
     Meteor.ddp.on('connected', () => {
       customLogging('EVENT Connected');
-      store.dispatch({ type: 'SET_DDP_CONNECTED', payload: true });
+      store.dispatch({ type: 'SET_DDP_CONNECTED', payload: true });  
+      DDPEventsRegistered = true;
 
       Meteor.ddp.on('disconnected', () => {
         customLogging('EVENT Disconnected');
@@ -65,8 +67,6 @@ const registerDDPEvents = ({ store }) => {
         queue.push({ type: 'ADDED', collection, id, fields });
         sync(store);
       });
-  
-      DDPEventsRegistered = true;
     });
   }
   console.log('Registering finished!');
