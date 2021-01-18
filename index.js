@@ -54,14 +54,15 @@ const initMeteorRedux = ({
   // Once persist finished rehydration (restoring data from AsyncStorage to redux)
   // run restoring to MiniMongo and register DDP events
   let previousRehydrated = store.getState()._persist.rehydrated;
-  store.subscribe(() => {
+  const usubscribeRehydrated = store.subscribe(() => {
     const rehydrated = store.getState()._persist.rehydrated;
     if (!previousRehydrated && rehydrated) {
       previousRehydrated = rehydrated;
       restoreCollections({ store });
-      registerDDPEvents({ store })
-    } else {
-      previousRehydrated = rehydrated;
+      registerDDPEvents({ store });
+
+      // Once we restored everything, we don't need to listen to rehydrated anymore.
+      usubscribeRehydrated();
     }
   });
 
