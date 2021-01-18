@@ -16,6 +16,11 @@ export default class MeteorOffline {
     Meteor.waitDdpConnected(() => {
       this.offline = (Meteor.ddp.status === 'connected') ? false : true;
     });
+
+    this.setUser = _.debounce(user => {
+      this.store.dispatch({ type: 'SET_USER', payload: user });
+    }, 500);
+
   }
 
   reset() {
@@ -43,13 +48,12 @@ export default class MeteorOffline {
     const user = Meteor.user();
     const currentState = this.store.getState();
     const cachedUser = currentState && currentState.METEOR_REDUX_REDUCERS && currentState.METEOR_REDUX_REDUCERS.RNMO_USER;
-
     // Return current user if connected, cached user if not, null in all other cases
     // TODO: Maybe need to update user on time interval as well
     if (user) {
       // If user has changed - cache it
       if (!_.isEqual(user, cachedUser)) {
-        this.store.dispatch({ type: 'SET_USER', payload: user });
+        this.setUser(user);
       } else {
         // console.log('Users are equal', user, cachedUser);
       }

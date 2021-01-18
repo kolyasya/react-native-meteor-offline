@@ -21,8 +21,9 @@ const meteorReduxReducers = (
     // Cache user
     case 'SET_USER': {
       const newState = { ...state };
-      if (payload && payload._id)
-        newState.RNMO_USER = payload;
+      if (action.payload && action.payload._id)
+        newState.RNMO_USER = action.payload;
+
       return newState;
     }
 
