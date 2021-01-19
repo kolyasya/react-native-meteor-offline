@@ -21,8 +21,9 @@ const sync = _.debounce(store => {
 
 let needToCleanUp = false;
 
-const cleanUpCollections = () => {
+const cleanUpCollections = ({ store }) => {
   console.log('Reconnected! Cleaning up collections...');
+  store.dispatch({ type: 'SET_DDP_CONNECTED', payload: true }); 
   // Cleaning up collections on reconnect
   const collectionsNames = Object.keys(getData().db.collections);
   collectionsNames?.map(cn => getData().db.collections[cn].remove({}));
@@ -49,21 +50,21 @@ const registerDDPEvents = ({ store }) => {
     
       Meteor.ddp.on('removed', ({ collection, id, fields = {} }) => {
         customLogging('EVENT Removed');
-        if (needToCleanUp) cleanUpCollections();
+        if (needToCleanUp) cleanUpCollections({ store });
         queue.push({ type: 'REMOVED', collection, id, fields });
         sync(store);
       });
     
       Meteor.ddp.on('changed', ({ collection, id, fields = {}, cleared = [] }) => {
         customLogging('EVENT Changed');
-        if (needToCleanUp) cleanUpCollections();
+        if (needToCleanUp) cleanUpCollections({ store });
         queue.push({ type: 'CHANGED', collection, id, fields, cleared });
         sync(store);
       });
     
       Meteor.ddp.on('added', ({ collection, id, fields = {} }, ...args) => {
         customLogging('EVENT Added');
-        if (needToCleanUp) cleanUpCollections();
+        if (needToCleanUp) cleanUpCollections({ store });
         queue.push({ type: 'ADDED', collection, id, fields });
         sync(store);
       });

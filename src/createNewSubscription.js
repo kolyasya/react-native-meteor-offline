@@ -14,6 +14,7 @@ const createNewSubscription = (self, uniqueName, name, params) => {
   if (subHandle) {
     subHandle.createdAt = new Date();
     Tracker.autorun(() => {
+      console.log(uniqueName, name, subHandle.ready());
       subHandle.lastRequestedAt = new Date();
     });
   }

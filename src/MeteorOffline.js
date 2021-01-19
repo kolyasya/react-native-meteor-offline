@@ -14,7 +14,7 @@ export default class MeteorOffline {
 
     this.offline = true;
     Meteor.waitDdpConnected(() => {
-      this.offline = (Meteor.ddp.status === 'connected') ? false : true;
+      this.offline = (Meteor.ddp?.status === 'connected') ? false : true;
     });
 
     this.setUser = _.debounce(user => {

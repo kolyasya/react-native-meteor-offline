@@ -90,6 +90,7 @@ const meteorReduxReducers = (
       // if get back online
       // we need to wipe all collections data
       if (!state.RNMO_DDP_CONNECTED && !!action.payload) {
+        console.log('WE ARE CONNECTED');
         // _.difference(Object.keys(newState), packagePrivateReducers).map(r => {
         //   const collectionToRemove = getData().db.collections[r];
         //   if (collectionToRemove) {
