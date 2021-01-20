@@ -32,13 +32,13 @@ const meteorReduxReducers = (
     // We put documents after reconnect here to replace
     // existing documents with them
     case 'ADD_TO_RECENTLY_ADDED': {
-      // console.log("ADD_TO_RECENTLY_ADDED", fields);
+      console.log("ADD_TO_RECENTLY_ADDED", collection, fields, id);
       return {
         ...state,
         'RNMO_RECENTLY_ADDED_DOCUMENTS': {
           ...state['RNMO_RECENTLY_ADDED_DOCUMENTS'],
           [collection]: [
-            ...(state[`RNMO_RECENTLY_ADDED_DOCUMENTS.${collection}`] || []),
+            ...(state.RNMO_RECENTLY_ADDED_DOCUMENTS[collection] || []),
             id 
           ]
         }
@@ -48,13 +48,15 @@ const meteorReduxReducers = (
     case 'CLEAN_RECENTLY_ADDED_FOR_COLLECTION': {
       // console.log('CLEAN');
 
-      const newRecenlyAdded = { ...state['RNMO_RECENTLY_ADDED_DOCUMENTS'] };
-      delete newRecenlyAdded[collection];
+      const newRecentlyAdded = { ...state['RNMO_RECENTLY_ADDED_DOCUMENTS'] };
+      delete newRecentlyAdded[collection];
+
+      console.log({ newRecentlyAdded });
 
       
       return {
         ...state,
-        'RNMO_RECENTLY_ADDED_DOCUMENTS': newRecenlyAdded,
+        'RNMO_RECENTLY_ADDED_DOCUMENTS': newRecentlyAdded,
         'RNMO_RECENTLY_CLEANED_COLLECTIONS': {
           ...state['RNMO_RECENTLY_CLEANED_COLLECTIONS'],
           [collection]: true
@@ -118,7 +120,7 @@ const meteorReduxReducers = (
       return state;
       
     case 'SET_DDP_CONNECTED': {
-      console.log({ action });
+      // console.log({ action });
       let newState = {
         ...state,
         RNMO_DDP_CONNECTED: !!action.payload

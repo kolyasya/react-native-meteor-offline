@@ -3,6 +3,7 @@ import { getData } from 'react-native-meteor';
 import _ from 'lodash';
 
 import createNewSubscription from './createNewSubscription';
+import cleanupCollectionsAfterReconnect from './cleanupCollectionsAfterReconnect';
 
 export default class MeteorOffline {
   constructor(options = {}) {
@@ -12,30 +13,30 @@ export default class MeteorOffline {
     this.store = options.store;
     this.persistor = options.persistor;
 
-    this.offline = true;
-    Meteor.waitDdpConnected(() => {
-      console.log('DDP CONNECTED');
-      this.offline = (Meteor.ddp?.status === 'connected') ? false : true;
-    });
-
     this.setUser = _.debounce(user => {
       this.store.dispatch({ type: 'SET_USER', payload: user });
     }, 500);
 
+    this.previousRecentlyAddedLength = -1;
+    
+    
+    this.connected = false;
     this.store.subscribe(() => {
       const state = this.store.getState();
-      const newOffline = !state.METEOR_REDUX_REDUCERS.RNMO_DDP_CONNECTED;
+      const newConnected = state.METEOR_REDUX_REDUCERS.RNMO_DDP_CONNECTED;
       // Updating offline status
-      if (newOffline !== this.offline) {
-        this.offline = newOffline;
+      if (newConnected !== this.connected) {
+        this.connected = newConnected;
 
-        if (!this.offline) {
-
+        // On reconnect we cleanup local collections
+        // This is needed because after reconnect Meteor sends only Added
+        // events. It means that if something was removed on a server
+        // we don't know about it
+        if (this.connected) {
+          cleanupCollectionsAfterReconnect(this);
         }
       }
-    })
-
-
+    });
   }
 
   reset() {
@@ -53,10 +54,6 @@ export default class MeteorOffline {
     }
 
     this.store.dispatch({ type: 'RESET' });
-  }
-
-  subReady(uniqueName) {
-    return this.subscriptions[uniqueName].ready && !this.offline;
   }
 
   user() {
@@ -128,35 +125,6 @@ export default class MeteorOffline {
   }
 
   collection(collection, subscriptionName) {
-    // console.log('COLLECTION CALL', collection);
-
-    const state = this.store.getState();
-
-    // After reconnect we wait for documents to be added to collection from server
-    // And clean up local cache
-    // So we check if the collection was cleaned and has some documents to compare with
-
-    if (
-      !state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_CLEANED_COLLECTIONS?.[collection] && 
-      state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_ADDED_DOCUMENTS?.[collection]?.length
-    ) {
-      const cachedDocumentsIds = Object.keys(state.METEOR_REDUX_REDUCERS[collection]);
-      const addedDocumentsIds = state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_ADDED_DOCUMENTS?.[collection];
-      const removedDocumentsIds = _.difference(cachedDocumentsIds, addedDocumentsIds);
-
-      console.log({
-        collection,
-        cachedDocumentsIds,
-        addedDocumentsIds,
-        removedDocumentsIds
-      });
-
-      this.store.dispatch({
-        type: 'CLEAN_RECENTLY_ADDED_FOR_COLLECTION',
-        collection
-      })
-    }
-
     this.collections = _.uniq([...this.collections, collection]);
     return Meteor.collection(collection);
   }
