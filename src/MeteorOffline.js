@@ -14,12 +14,27 @@ export default class MeteorOffline {
 
     this.offline = true;
     Meteor.waitDdpConnected(() => {
+      console.log('DDP CONNECTED');
       this.offline = (Meteor.ddp?.status === 'connected') ? false : true;
     });
 
     this.setUser = _.debounce(user => {
       this.store.dispatch({ type: 'SET_USER', payload: user });
     }, 500);
+
+    this.store.subscribe(() => {
+      const state = this.store.getState();
+      const newOffline = !state.METEOR_REDUX_REDUCERS.RNMO_DDP_CONNECTED;
+      // Updating offline status
+      if (newOffline !== this.offline) {
+        this.offline = newOffline;
+
+        if (!this.offline) {
+
+        }
+      }
+    })
+
 
   }
 
@@ -46,8 +61,8 @@ export default class MeteorOffline {
 
   user() {
     const user = Meteor.user();
-    const currentState = this.store.getState();
-    const cachedUser = currentState && currentState.METEOR_REDUX_REDUCERS && currentState.METEOR_REDUX_REDUCERS.RNMO_USER;
+    const state = this.store.getState();
+    const cachedUser = state?.METEOR_REDUX_REDUCERS?.RNMO_USER;
     // Return current user if connected, cached user if not, null in all other cases
     // TODO: Maybe need to update user on time interval as well
     if (user) {
@@ -87,7 +102,6 @@ export default class MeteorOffline {
       }
       return existingSub.handle;
     } else {
-      // console.log(`MeteorOffline.subscribe : cache miss for ${name} **********************************************************************************`);
       return createNewSubscription(this, uniqueName, name, subscriptionParams);
     }
   }
@@ -114,6 +128,35 @@ export default class MeteorOffline {
   }
 
   collection(collection, subscriptionName) {
+    // console.log('COLLECTION CALL', collection);
+
+    const state = this.store.getState();
+
+    // After reconnect we wait for documents to be added to collection from server
+    // And clean up local cache
+    // So we check if the collection was cleaned and has some documents to compare with
+
+    if (
+      !state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_CLEANED_COLLECTIONS?.[collection] && 
+      state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_ADDED_DOCUMENTS?.[collection]?.length
+    ) {
+      const cachedDocumentsIds = Object.keys(state.METEOR_REDUX_REDUCERS[collection]);
+      const addedDocumentsIds = state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_ADDED_DOCUMENTS?.[collection];
+      const removedDocumentsIds = _.difference(cachedDocumentsIds, addedDocumentsIds);
+
+      console.log({
+        collection,
+        cachedDocumentsIds,
+        addedDocumentsIds,
+        removedDocumentsIds
+      });
+
+      this.store.dispatch({
+        type: 'CLEAN_RECENTLY_ADDED_FOR_COLLECTION',
+        collection
+      })
+    }
+
     this.collections = _.uniq([...this.collections, collection]);
     return Meteor.collection(collection);
   }

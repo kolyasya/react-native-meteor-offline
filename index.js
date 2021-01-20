@@ -6,7 +6,6 @@ import AsyncStorage from '@react-native-community/async-storage';
 import meteorReduxReducers from './src/meteorReduxReducers';
 import MeteorOffline from './src/MeteorOffline';
 import subscribeCached from './src/subscribeCached';
-import returnCached from './src/returnCached';
 import restoreCollections from './src/restoreCollections';
 import registerDDPEvents from './src/registerDDPEvents';
 
@@ -69,5 +68,5 @@ const initMeteorRedux = ({
   return { store, persistor };
 };
 
-export { meteorReduxReducers, subscribeCached, returnCached, MeteorOffline };
+export { meteorReduxReducers, subscribeCached, MeteorOffline };
 export default initMeteorRedux;

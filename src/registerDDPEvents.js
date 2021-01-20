@@ -6,7 +6,7 @@ import _ from 'lodash';
 let queue = [];
 let DDPEventsRegistered = false;
 
-const loggingEnabled = true;
+const loggingEnabled = false;
 const customLogging = (...args) => {
   if (loggingEnabled) { console.log(...args); }
 }
@@ -22,7 +22,8 @@ const sync = _.debounce(store => {
 let needToCleanUp = false;
 
 const cleanUpCollections = ({ store }) => {
-  console.log('Reconnected! Cleaning up collections...');
+  return; 
+  customLogging('Reconnected! Cleaning up collections...');
   store.dispatch({ type: 'SET_DDP_CONNECTED', payload: true }); 
   // Cleaning up collections on reconnect
   const collectionsNames = Object.keys(getData().db.collections);
@@ -31,7 +32,7 @@ const cleanUpCollections = ({ store }) => {
 }
 
 const registerDDPEvents = ({ store }) => {
-  console.log('Registering DDP events...');
+  customLogging('Registering DDP events...');
 
   // Register events only for on a first connect
   // Don't know why connected only gets fired once
@@ -64,13 +65,19 @@ const registerDDPEvents = ({ store }) => {
     
       Meteor.ddp.on('added', ({ collection, id, fields = {} }, ...args) => {
         customLogging('EVENT Added');
-        if (needToCleanUp) cleanUpCollections({ store });
+        if (!store.getState().METEOR_REDUX_REDUCERS.RNMO_DDP_CONNECTED) {
+          store.dispatch({ type: 'SET_DDP_CONNECTED', payload: true }); 
+        }
+        if (needToCleanUp) {
+          cleanUpCollections({ store });
+        }
         queue.push({ type: 'ADDED', collection, id, fields });
+        queue.push({ type: 'ADD_TO_RECENTLY_ADDED', collection, id, fields });
         sync(store);
       });
     });
   }
-  console.log('Registering finished!');
+  customLogging('Registering finished!');
 }
 
 export default registerDDPEvents;

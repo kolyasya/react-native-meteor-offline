@@ -9,6 +9,8 @@ const initialState = {
   RNMO_USER: null,
   RNMO_DDP_CONNECTED: false,
   RNMO_SUBSCRIPTIONS: {},
+  RNMO_RECENTLY_ADDED_DOCUMENTS: {},
+  RNMO_RECENTLY_CLEANED_COLLECTIONS: {},
 };
 
 const meteorReduxReducers = (
@@ -26,6 +28,40 @@ const meteorReduxReducers = (
 
       return newState;
     }
+
+    // We put documents after reconnect here to replace
+    // existing documents with them
+    case 'ADD_TO_RECENTLY_ADDED': {
+      // console.log("ADD_TO_RECENTLY_ADDED", fields);
+      return {
+        ...state,
+        'RNMO_RECENTLY_ADDED_DOCUMENTS': {
+          ...state['RNMO_RECENTLY_ADDED_DOCUMENTS'],
+          [collection]: [
+            ...(state[`RNMO_RECENTLY_ADDED_DOCUMENTS.${collection}`] || []),
+            id 
+          ]
+        }
+      };
+    }
+
+    case 'CLEAN_RECENTLY_ADDED_FOR_COLLECTION': {
+      // console.log('CLEAN');
+
+      const newRecenlyAdded = { ...state['RNMO_RECENTLY_ADDED_DOCUMENTS'] };
+      delete newRecenlyAdded[collection];
+
+      
+      return {
+        ...state,
+        'RNMO_RECENTLY_ADDED_DOCUMENTS': newRecenlyAdded,
+        'RNMO_RECENTLY_CLEANED_COLLECTIONS': {
+          ...state['RNMO_RECENTLY_CLEANED_COLLECTIONS'],
+          [collection]: true
+        }
+      };
+    }
+    
 
     case 'ADDED': {
       // console.log("ADDED", fields);
@@ -82,6 +118,7 @@ const meteorReduxReducers = (
       return state;
       
     case 'SET_DDP_CONNECTED': {
+      console.log({ action });
       let newState = {
         ...state,
         RNMO_DDP_CONNECTED: !!action.payload
@@ -90,15 +127,11 @@ const meteorReduxReducers = (
       // if get back online
       // we need to wipe all collections data
       if (!state.RNMO_DDP_CONNECTED && !!action.payload) {
-        console.log('WE ARE CONNECTED');
-        // _.difference(Object.keys(newState), packagePrivateReducers).map(r => {
-        //   const collectionToRemove = getData().db.collections[r];
-        //   if (collectionToRemove) {
-        //     console.log('Removing items from', r);
-        //     collectionToRemove.remove({});
-        //   }
-        //   return state[r] = [];
-        // });
+        // console.log('WE ARE CONNECTED');
+        // Clean up recently added documents on reconnect
+        // console.log('Cleaning up Recently added');
+        newState['RNMO_RECENTLY_ADDED_DOCUMENTS'] = initialState.RNMO_RECENTLY_ADDED_DOCUMENTS;
+        newState['RNMO_RECENTLY_CLEANED_COLLECTIONS'] = initialState.RNMO_RECENTLY_CLEANED_COLLECTIONS;
       }
 
       return newState;
