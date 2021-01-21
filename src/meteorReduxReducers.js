@@ -32,7 +32,7 @@ const meteorReduxReducers = (
     // We put documents after reconnect here to replace
     // existing documents with them
     case 'ADD_TO_RECENTLY_ADDED': {
-      console.log("ADD_TO_RECENTLY_ADDED", collection, fields, id);
+      // console.log("ADD_TO_RECENTLY_ADDED", collection, fields, id);
       return {
         ...state,
         'RNMO_RECENTLY_ADDED_DOCUMENTS': {
@@ -51,7 +51,7 @@ const meteorReduxReducers = (
       const newRecentlyAdded = { ...state['RNMO_RECENTLY_ADDED_DOCUMENTS'] };
       delete newRecentlyAdded[collection];
 
-      console.log({ newRecentlyAdded });
+      // console.log({ newRecentlyAdded });
 
       
       return {
@@ -134,6 +134,14 @@ const meteorReduxReducers = (
         // console.log('Cleaning up Recently added');
         newState['RNMO_RECENTLY_ADDED_DOCUMENTS'] = initialState.RNMO_RECENTLY_ADDED_DOCUMENTS;
         newState['RNMO_RECENTLY_CLEANED_COLLECTIONS'] = initialState.RNMO_RECENTLY_CLEANED_COLLECTIONS;
+      }
+
+      // On disconnect reset all subs status
+      if (!action.payload) {
+        newState.RNMO_SUBSCRIPTIONS = Object.keys(state.RNMO_SUBSCRIPTIONS).reduce((p, c) => ({
+          ...p,
+          [c]: { ...state.RNMO_SUBSCRIPTIONS[c], ready: false, cleaned: false }
+        }), {});
       }
 
       return newState;

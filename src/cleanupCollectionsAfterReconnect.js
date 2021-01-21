@@ -9,6 +9,13 @@ const cleanupCollectionsAfterReconnect = (self) => {
   if (!self) return;
 
   const state = self.store.getState();
+
+  
+  const dirtySubscribtions = state.METEOR_REDUX_REDUCERS.RNMO_SUBSCRIPTIONS?.filter(s => s.ready && !s.cleaned);
+
+  console.log({ dirtySubscribtions });
+
+
   const newRecentlyAddedLength = JSON.stringify(state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_ADDED_DOCUMENTS).length;
 
   console.log(self.previousRecentlyAddedLength, newRecentlyAddedLength);
