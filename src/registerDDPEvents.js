@@ -3,7 +3,7 @@ import { batch } from 'react-redux'
 import _ from 'lodash';
 
 // For dev purposes to quickly enable disable logging in this file
-const loggingEnabled = true;
+const loggingEnabled = false;
 const customLogging = (...args) => {
   if (loggingEnabled) { console.log(...args); }
 }
