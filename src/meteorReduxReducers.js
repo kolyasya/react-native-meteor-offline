@@ -19,6 +19,8 @@ const meteorReduxReducers = (
 ) => {
   const { type, collection, id, fields, cleared, payload } = action;
 
+  // console.log({ type, state });
+
   switch (type) {
     // Cache user
     case 'SET_USER': {
@@ -37,10 +39,10 @@ const meteorReduxReducers = (
         ...state,
         'RNMO_RECENTLY_ADDED_DOCUMENTS': {
           ...state['RNMO_RECENTLY_ADDED_DOCUMENTS'],
-          [collection]: [
+          [collection]: _.uniq([
             ...(state.RNMO_RECENTLY_ADDED_DOCUMENTS[collection] || []),
             id 
-          ]
+          ])
         }
       };
     }
@@ -58,10 +60,10 @@ const meteorReduxReducers = (
         ...state,
         'RNMO_RECENTLY_ADDED_DOCUMENTS': newRecentlyAdded,
         'RNMO_SUBSCRIPTIONS': newSubscriptions,
-        'RNMO_RECENTLY_CLEANED_COLLECTIONS': {
+        'RNMO_RECENTLY_CLEANED_COLLECTIONS': collection ? {
           ...state['RNMO_RECENTLY_CLEANED_COLLECTIONS'],
           [collection]: true
-        }
+        } : state['RNMO_RECENTLY_CLEANED_COLLECTIONS']
       };
     }
     
@@ -121,7 +123,6 @@ const meteorReduxReducers = (
       return state;
       
     case 'SET_DDP_CONNECTED': {
-      // console.log({ action });
       let newState = {
         ...state,
         RNMO_DDP_CONNECTED: !!action.payload
@@ -133,8 +134,9 @@ const meteorReduxReducers = (
         // console.log('WE ARE CONNECTED');
         // Clean up recently added documents on reconnect
         // console.log('Cleaning up Recently added');
-        newState['RNMO_RECENTLY_ADDED_DOCUMENTS'] = initialState.RNMO_RECENTLY_ADDED_DOCUMENTS;
-        newState['RNMO_RECENTLY_CLEANED_COLLECTIONS'] = initialState.RNMO_RECENTLY_CLEANED_COLLECTIONS;
+
+        newState['RNMO_RECENTLY_ADDED_DOCUMENTS'] = { ...initialState.RNMO_RECENTLY_ADDED_DOCUMENTS };
+        newState['RNMO_RECENTLY_CLEANED_COLLECTIONS'] = { ...initialState.RNMO_RECENTLY_CLEANED_COLLECTIONS };
       }
 
       // On disconnect reset all subs status
