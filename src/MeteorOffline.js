@@ -4,6 +4,7 @@ import _ from 'lodash';
 
 import createNewSubscription from './createNewSubscription';
 import cleanupCollectionsAfterReconnect from './cleanupCollectionsAfterReconnect';
+import cleanupDirtySubscriptions from './cleanupDirtySubscriptions';
 
 export default class MeteorOffline {
   constructor(options = {}) {
@@ -19,11 +20,17 @@ export default class MeteorOffline {
 
     this.previousRecentlyAddedLength = -1;
     
-    
     this.connected = false;
     this.store.subscribe(() => {
       const state = this.store.getState();
       const newConnected = state.METEOR_REDUX_REDUCERS.RNMO_DDP_CONNECTED;
+
+      if (newConnected) {
+        // Don't use this one for now, because we need to define relations
+        // between collections and subscriptions
+        // cleanupDirtySubscriptions(this, { state });
+      }
+
       // Updating offline status
       if (newConnected !== this.connected) {
         this.connected = newConnected;
@@ -32,9 +39,8 @@ export default class MeteorOffline {
         // This is needed because after reconnect Meteor sends only Added
         // events. It means that if something was removed on a server
         // we don't know about it
-        if (this.connected) {
-          cleanupCollectionsAfterReconnect(this);
-        }
+        console.log('Starting cleanup...');
+        cleanupCollectionsAfterReconnect(this);
       }
     });
   }

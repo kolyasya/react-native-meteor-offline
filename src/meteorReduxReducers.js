@@ -51,12 +51,13 @@ const meteorReduxReducers = (
       const newRecentlyAdded = { ...state['RNMO_RECENTLY_ADDED_DOCUMENTS'] };
       delete newRecentlyAdded[collection];
 
-      // console.log({ newRecentlyAdded });
-
+      const newSubscriptions = { ...state['RNMO_SUBSCRIPTIONS'] };
+      newSubscriptions[collection] = { ...state.RNMO_SUBSCRIPTIONS[collection], cleaned: true };
       
       return {
         ...state,
         'RNMO_RECENTLY_ADDED_DOCUMENTS': newRecentlyAdded,
+        'RNMO_SUBSCRIPTIONS': newSubscriptions,
         'RNMO_RECENTLY_CLEANED_COLLECTIONS': {
           ...state['RNMO_RECENTLY_CLEANED_COLLECTIONS'],
           [collection]: true

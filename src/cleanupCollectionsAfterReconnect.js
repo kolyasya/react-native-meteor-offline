@@ -9,25 +9,19 @@ const cleanupCollectionsAfterReconnect = (self) => {
   if (!self) return;
 
   const state = self.store.getState();
-
-  
-  const dirtySubscribtions = state.METEOR_REDUX_REDUCERS.RNMO_SUBSCRIPTIONS?.filter(s => s.ready && !s.cleaned);
-
-  console.log({ dirtySubscribtions });
-
-
   const newRecentlyAddedLength = JSON.stringify(state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_ADDED_DOCUMENTS).length;
 
-  console.log(self.previousRecentlyAddedLength, newRecentlyAddedLength);
+  console.log('Recently added comparision', self.previousRecentlyAddedLength, newRecentlyAddedLength);
 
   // If we are still getting data postpone cleanup for 3000 ms
   if (newRecentlyAddedLength !== self.previousRecentlyAddedLength) {
-    console.log('postpone');
+    console.log('Postpone cleanup for 3000 ms');
     self.previousRecentlyAddedLength = newRecentlyAddedLength;
     setTimeout(() => cleanupCollectionsAfterReconnect(self), 3000);
   } 
   // Actual clean up
   else {
+      console.log('Actual cleanup');
       const state = self.store.getState();
       const collectionsNames = Object.keys(getData().db.collections);
 
