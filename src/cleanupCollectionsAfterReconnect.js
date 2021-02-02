@@ -14,8 +14,8 @@ const cleanupCollectionsAfterReconnect = (self) => {
   console.log('Recently added comparision', self.previousRecentlyAddedLength, newRecentlyAddedLength);
 
   // If we are still getting data postpone cleanup for 3000 ms
-  if (newRecentlyAddedLength !== self.previousRecentlyAddedLength) {
-    console.log('Postpone cleanup for 3000 ms');
+  if (false && newRecentlyAddedLength !== self.previousRecentlyAddedLength) {
+    // console.log('Postpone cleanup for 3000 ms');
     self.previousRecentlyAddedLength = newRecentlyAddedLength;
     setTimeout(() => cleanupCollectionsAfterReconnect(self), 3000);
   } 

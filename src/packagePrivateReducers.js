@@ -1,6 +1,7 @@
 const packagePrivateReducers = [
   'RNMO_DDP_CONNECTED', 
   'RNMO_RESTORED', 
+  'RNMO_CLEANED_AFTER_RECONNECT', 
   'RNMO_RECENTLY_ADDED', 
   'RNMO_USER', 
   'RNMO_SUBSCRIPTIONS', 

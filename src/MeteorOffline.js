@@ -21,27 +21,19 @@ export default class MeteorOffline {
     this.previousRecentlyAddedLength = -1;
     
     this.connected = false;
+    this.cleanedAfterReconnect = false;
     this.store.subscribe(() => {
       const state = this.store.getState();
-      const newConnected = state.METEOR_REDUX_REDUCERS.RNMO_DDP_CONNECTED;
+      const newCleanedAfterReconnect = state.METEOR_REDUX_REDUCERS.RNMO_CLEANED_AFTER_RECONNECT;
 
-      if (newConnected) {
-        // Don't use this one for now, because we need to define relations
-        // between collections and subscriptions
-        // cleanupDirtySubscriptions(this, { state });
-      }
+      // This change triggers a clean up process
+      if (!this.cleanedAfterReconnect && newCleanedAfterReconnect) {
+        console.log('Starting the cleanup!');
+        // Added delay here for no to make sure that this function runs last when we have all downloaded data
+        setTimeout(() => cleanupCollectionsAfterReconnect(this), 1000);
+      };
 
-      // Updating offline status
-      if (newConnected !== this.connected) {
-        this.connected = newConnected;
-
-        // On reconnect we cleanup local collections
-        // This is needed because after reconnect Meteor sends only Added
-        // events. It means that if something was removed on a server
-        // we don't know about it
-        console.log('Starting cleanup...');
-        cleanupCollectionsAfterReconnect(this);
-      }
+      this.cleanedAfterReconnect = newCleanedAfterReconnect;
     });
   }
 

@@ -6,6 +6,7 @@ import packagePrivateReducers from './packagePrivateReducers';
 
 const initialState = { 
   RNMO_RESTORED: false,
+  RNMO_CLEANED_AFTER_RECONNECT: false,
   RNMO_USER: null,
   RNMO_DDP_CONNECTED: false,
   RNMO_SUBSCRIPTIONS: {},
@@ -50,21 +51,25 @@ const meteorReduxReducers = (
     case 'CLEAN_RECENTLY_ADDED_FOR_COLLECTION': {
       // console.log('CLEAN');
 
-      const newRecentlyAdded = { ...state['RNMO_RECENTLY_ADDED_DOCUMENTS'] };
-      delete newRecentlyAdded[collection];
+      if (collection) {
+        const newRecentlyAdded = { ...state['RNMO_RECENTLY_ADDED_DOCUMENTS'] };
+        delete newRecentlyAdded[collection];
 
-      const newSubscriptions = { ...state['RNMO_SUBSCRIPTIONS'] };
-      newSubscriptions[collection] = { ...state.RNMO_SUBSCRIPTIONS[collection], cleaned: true };
+        const newSubscriptions = { ...state['RNMO_SUBSCRIPTIONS'] };
+        newSubscriptions[collection] = { ...state.RNMO_SUBSCRIPTIONS[collection], cleaned: true };
+        
+        return {
+          ...state,
+          'RNMO_RECENTLY_ADDED_DOCUMENTS': newRecentlyAdded,
+          'RNMO_SUBSCRIPTIONS': newSubscriptions,
+          'RNMO_RECENTLY_CLEANED_COLLECTIONS': {
+            ...state['RNMO_RECENTLY_CLEANED_COLLECTIONS'],
+            [collection]: true
+          }
+        };
+      } else return state;
+
       
-      return {
-        ...state,
-        'RNMO_RECENTLY_ADDED_DOCUMENTS': newRecentlyAdded,
-        'RNMO_SUBSCRIPTIONS': newSubscriptions,
-        'RNMO_RECENTLY_CLEANED_COLLECTIONS': collection ? {
-          ...state['RNMO_RECENTLY_CLEANED_COLLECTIONS'],
-          [collection]: true
-        } : state['RNMO_RECENTLY_CLEANED_COLLECTIONS']
-      };
     }
     
 
@@ -137,6 +142,7 @@ const meteorReduxReducers = (
 
         newState['RNMO_RECENTLY_ADDED_DOCUMENTS'] = { ...initialState.RNMO_RECENTLY_ADDED_DOCUMENTS };
         newState['RNMO_RECENTLY_CLEANED_COLLECTIONS'] = { ...initialState.RNMO_RECENTLY_CLEANED_COLLECTIONS };
+        newState['RNMO_CLEANED_AFTER_RECONNECT'] = initialState.RNMO_CLEANED_AFTER_RECONNECT;
       }
 
       // On disconnect reset all subs status
@@ -158,15 +164,36 @@ const meteorReduxReducers = (
 
     case 'SET_SUBSCRIPTION':
       const { payload } = action;
-      return {
-        ...state,
-        RNMO_SUBSCRIPTIONS: {
-          ...state.RNMO_SUBSCRIPTIONS,
-          [payload.name]: {
-            ready: payload.ready
-          }
-        }
+      const newState = { ...state };
+
+      const newSubscriptionsState = {
+        ...state.RNMO_SUBSCRIPTIONS,
       };
+
+      // Preveting strange `undefined` subscriptions
+      if (payload.name) {
+        newSubscriptionsState[payload.name] = {
+          ready: payload.ready
+        }
+      }
+
+      // If we didn't clean up after reconnect yet
+      if (!state.RNMO_CLEANED_AFTER_RECONNECT) {
+        const notReadySubs = Object.keys(newSubscriptionsState).filter(k => !newSubscriptionsState[k].ready);
+        console.log({ notReadySubs });
+
+        if (notReadySubs.length === 0) {
+          console.log('All subs are ready! Cleaning!');
+          // The app will react on that change by cleaning up the collections
+          newState.RNMO_CLEANED_AFTER_RECONNECT = true;
+        }
+      }
+
+      newState.RNMO_SUBSCRIPTIONS = { ...newSubscriptionsState };
+
+      
+
+      return newState;
 
     default:
       return state;
