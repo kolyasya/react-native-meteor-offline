@@ -18,8 +18,8 @@ export default class MeteorOffline {
       this.store.dispatch({ type: 'SET_USER', payload: user });
     }, 500);
 
-    this.previousRecentlyAddedLength = -1;
     
+    this.previousRecentlyAddedLength = -1;
     this.connected = false;
     this.cleanedAfterReconnect = false;
     this.store.subscribe(() => {
@@ -29,8 +29,9 @@ export default class MeteorOffline {
       // This change triggers a clean up process
       if (!this.cleanedAfterReconnect && newCleanedAfterReconnect) {
         console.log('Starting the cleanup!');
-        // Added delay here for no to make sure that this function runs last when we have all downloaded data
-        setTimeout(() => cleanupCollectionsAfterReconnect(this), 1000);
+        // Added delay here for now to make sure that 
+        // this function runs last when we have all downloaded data
+        setTimeout(() => cleanupCollectionsAfterReconnect(this), 500);
       };
 
       this.cleanedAfterReconnect = newCleanedAfterReconnect;

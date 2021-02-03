@@ -14,6 +14,9 @@ globalPersistor = '';
 disconnect = () => {
   Meteor.disconnect();
 }
+
+// AsyncStorage.clear();
+
 reconnect = () => {
   Meteor.reconnect();
 }

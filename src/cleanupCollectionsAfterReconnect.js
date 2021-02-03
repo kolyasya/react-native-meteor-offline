@@ -9,10 +9,10 @@ const cleanupCollectionsAfterReconnect = (self) => {
   if (!self) return;
 
   const state = self.store.getState();
-  const newRecentlyAddedLength = JSON.stringify(state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_ADDED_DOCUMENTS).length;
+  // const newRecentlyAddedLength = JSON.stringify(state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_ADDED_DOCUMENTS).length;
+  // console.log('Recently added comparision', self.previousRecentlyAddedLength, newRecentlyAddedLength);
 
-  console.log('Recently added comparision', self.previousRecentlyAddedLength, newRecentlyAddedLength);
-
+  // This part is disabled for now
   // If we are still getting data postpone cleanup for 3000 ms
   if (false && newRecentlyAddedLength !== self.previousRecentlyAddedLength) {
     // console.log('Postpone cleanup for 3000 ms');
@@ -25,25 +25,27 @@ const cleanupCollectionsAfterReconnect = (self) => {
       const state = self.store.getState();
       const collectionsNames = Object.keys(getData().db.collections);
 
-      collectionsNames?.map(cn => {
-        if (!state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_CLEANED_COLLECTIONS[cn]) {
-          const newData = state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_ADDED_DOCUMENTS[cn];
+      collectionsNames?.map(collectionName => {
+        // If we didn't clean this collection yet
+        if (!state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_CLEANED_COLLECTIONS[collectionName]) {
+          // Picking documents from recently added reducer (added after reconnect)
+          const newData = state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_ADDED_DOCUMENTS[collectionName];
           
           // If we didn't get any added items for collection just wipe it
           if (!newData?.length) {
-            console.log('Wipe', cn);
-            getData().db.collections[cn].remove({});
+            console.log('Wipe collection:', collectionName);
+            getData().db.collections[collectionName].remove({});
           } 
           // If we have something — filter all other items out from a collection
           else {
-            console.log('Filter', cn, newData);
-            getData().db.collections[cn].remove({_id: { $nin: newData }});
+            console.log('Filter collection', collectionName, 'new data', newData);
+            getData().db.collections[collectionName].remove({_id: { $nin: newData }});
           };
 
           // Clean up recently added for a collection and mark it as cleaned
           self.store.dispatch({
             type: 'CLEAN_RECENTLY_ADDED_FOR_COLLECTION',
-            cn
+            collection: collectionName
           });
         }
       });

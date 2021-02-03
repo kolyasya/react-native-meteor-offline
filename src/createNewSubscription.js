@@ -4,7 +4,6 @@ const createNewSubscription = (self, uniqueName, name, params) => {
   let subHandle;
 
   subHandle = Meteor.subscribe(name, ...params, (result) => {
-    console.log(result);
     self.store.dispatch({ type: 'SET_SUBSCRIPTION', payload: {
       name,
       ready: true
