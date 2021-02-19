@@ -27,9 +27,9 @@ const cleanupCollectionsAfterReconnect = (self) => {
 
       collectionsNames?.map(collectionName => {
         // If we didn't clean this collection yet
-        if (!state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_CLEANED_COLLECTIONS[collectionName]) {
+        if (!state.METEOR_REDUX_REDUCERS?.RNMO_RECENTLY_CLEANED_COLLECTIONS?.[collectionName]) {
           // Picking documents from recently added reducer (added after reconnect)
-          const newData = state.METEOR_REDUX_REDUCERS.RNMO_RECENTLY_ADDED_DOCUMENTS[collectionName];
+          const newData = state.METEOR_REDUX_REDUCERS?.RNMO_RECENTLY_ADDED_DOCUMENTS?.[collectionName];
           
           // If we didn't get any added items for collection just wipe it
           if (!newData?.length) {

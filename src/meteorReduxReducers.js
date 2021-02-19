@@ -2,8 +2,6 @@ import Meteor, { getData } from 'react-native-meteor';
 
 import _ from 'lodash';
 
-import packagePrivateReducers from './packagePrivateReducers';
-
 const initialState = { 
   RNMO_RESTORED: false,
   RNMO_CLEANED_AFTER_RECONNECT: false,

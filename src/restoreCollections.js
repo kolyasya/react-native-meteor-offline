@@ -46,7 +46,7 @@ const restoreCollections = ({ store }) => {
       return;
     }
 
-    customLogging('RESTORRING COLLECTION', collectionName);
+    customLogging('RESTORING COLLECTION', collectionName);
 
     const persistDocuments = persistStateReducers[collectionName];
 
