@@ -22,7 +22,7 @@ const cleanupCollectionsAfterReconnect = (self) => {
   // Actual clean up
   else {
       console.log('Actual cleanup');
-      const state = self.store.getState();
+      const state = self.store.getState() || {};
       const collectionsNames = Object.keys(getData().db.collections);
 
       collectionsNames?.map(collectionName => {
