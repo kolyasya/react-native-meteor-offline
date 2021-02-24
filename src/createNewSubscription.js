@@ -3,6 +3,10 @@ import Meteor, { Tracker } from 'react-native-meteor';
 const createNewSubscription = (self, uniqueName, name, params) => {
   let subHandle;
 
+  if (self.subscriptions[uniqueName]) {
+    self.subscriptions[uniqueName].handle.stop();
+  }
+
   subHandle = Meteor.subscribe(name, ...params, (result) => {
     self.store.dispatch({ type: 'SET_SUBSCRIPTION', payload: {
       name,
