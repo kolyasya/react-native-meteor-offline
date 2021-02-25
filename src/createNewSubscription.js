@@ -3,6 +3,7 @@ import Meteor, { Tracker } from 'react-native-meteor';
 const createNewSubscription = (self, uniqueName, name, params) => {
   let subHandle;
 
+  // Remove subscription with the same name
   if (self.subscriptions[uniqueName]) {
     self.subscriptions[uniqueName].handle.stop();
   }

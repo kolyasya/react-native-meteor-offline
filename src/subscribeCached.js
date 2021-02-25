@@ -4,7 +4,7 @@ const subscribeCached = (store, name, ...args) => {
   let offline = true;
   const subHandle = Meteor.subscribe(name, ...args);
   Meteor.waitDdpConnected(() => {
-    if (Meteor.ddp.status === 'connected') {
+    if (Meteor.ddp?.status === 'connected') {
       offline = false;
     }
   });
