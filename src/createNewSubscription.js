@@ -30,6 +30,8 @@ const createNewSubscription = (self, uniqueName, name, params) => {
     handle: subHandle
   };
 
+  // console.log(self.subscriptions);
+
   return subHandle;
 };
 

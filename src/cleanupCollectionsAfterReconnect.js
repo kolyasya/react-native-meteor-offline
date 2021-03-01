@@ -33,12 +33,12 @@ const cleanupCollectionsAfterReconnect = (self) => {
           
           // If we didn't get any added items for collection just wipe it
           if (!newData?.length) {
-            console.log('Wipe collection:', collectionName);
+            // console.log('Wipe collection:', collectionName);
             getData().db.collections[collectionName].remove({});
           } 
           // If we have something — filter all other items out from a collection
           else {
-            console.log('Filter collection', collectionName, 'new data', newData);
+            // console.log('Filter collection', collectionName, 'new data', newData);
             getData().db.collections[collectionName].remove({_id: { $nin: newData }});
           };
 

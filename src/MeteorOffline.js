@@ -28,7 +28,7 @@ export default class MeteorOffline {
 
       // This change triggers a clean up process
       if (!this.cleanedAfterReconnect && newCleanedAfterReconnect) {
-        console.log('Starting the cleanup!');
+        // console.log('Starting the cleanup!');
         // Added delay here for now to make sure that 
         // this function runs last when we have all downloaded data
         setTimeout(() => cleanupCollectionsAfterReconnect(this), 500);

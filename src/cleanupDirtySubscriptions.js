@@ -19,12 +19,12 @@ const cleanupDirtySubscriptions = (self, { state }) => {
         
         // If we didn't get any added items for collection just wipe it
         if (!newData?.length) {
-          console.log('Wipe', subName);
+          // console.log('Wipe', subName);
           collectionToClean.remove({});
         } 
         // If we have something — filter all other items out from a collection
         else {
-          console.log('Filter', subName, newData);
+          // console.log('Filter', subName, newData);
           collectionToClean.remove({_id: { $nin: newData }});
         };
 
